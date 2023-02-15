@@ -12,8 +12,6 @@ out <- read.csv("AMR_analytic_matrix.csv")
 # drop extension from file name
 colnames(out) <- str_split_i(colnames(out), "_", 1)
 
-# save work
-save.image("data/wrangling.RData")
 
 # break up gene information
 genes <- as.data.frame(rownames(out))
@@ -59,7 +57,8 @@ ggplot(meltdf %>%
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
   
 
-
+# save work
+save.image("data/wrangling.RData")
 
 
 # random line of code to keep the space at the bottom so I'm not typing tight against the console.
