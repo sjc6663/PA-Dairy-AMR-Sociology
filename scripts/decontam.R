@@ -54,13 +54,21 @@ contams
 
 # remove contaminant sequences
 nocontam <- prune_taxa(!rownames(ps@tax_table) %in% contams, ps)
-  
-# Sophia will figure this out and get it to me
-ps_filter(ps, )
+
+# get a name of the controls list
+controls <- ps %>%
+  ps_filter(SampleBinary == "Control", .keep_all_taxa = TRUE)#or whatever you named that column
+
+controls <- sample_data(controls)$Sample.ID #or whatver you have your sample ID column named
 
 # remove all controls
-nocontrol <- prune_samples(!str_detect(PUT SOMETHING HERE FROM ABOVE^^, rownames(nocontam@sam_data)), nocontam)
+nocontrol <- subset_samples(
+  nocontam,
+  SampleBinary == "Sample"
+)
 
+# save the decontaminated phyloseq object for downstrem analysis
+saveRDS(nocontrol, file = "data/ransom/decontam-ps.rds")
 
 # save work
 save.image("data/decontam.RData")
