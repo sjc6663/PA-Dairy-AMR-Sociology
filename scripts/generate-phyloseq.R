@@ -5,7 +5,7 @@
 library(BiocManager)
 library(stringr)
 library(tidyverse)
-install.packages("tidylog")
+# install.packages("tidylog")
 library(tidylog)
 # BiocManager::install("phyloseq")
 library(phyloseq)
@@ -74,7 +74,9 @@ samp <- phyloseq::sample_data(met)
 rownames(samp) <- met$`Sample-ID`
 ​
 ps <- phyloseq::phyloseq(otutab, taxtab, samp)
-​
+
+ps <- phyloseq::phyloseq(samp)
+
 #save the ps object 
 saveRDS(ps, "data/ransom/rawps.rds")
 ​
