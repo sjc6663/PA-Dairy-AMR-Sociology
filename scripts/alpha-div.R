@@ -114,8 +114,19 @@ HS <- plot_richness(ps, x="Herd.Size", measures=c("Shannon"), title = "Herd Size
 HS
 ggsave(plot = HS, filename = "plots/herd-size.pdf", dpi = 600)
 
+## Violin Plots ----
 
+ps.meta <- meta(ps)
+ps.meta$Shannon <- phyloseq::estimate_richness(ps, measures = "Shannon")
 
+ps.meta$'' <- alpha(ps, index = 'shannon')
+
+p1 <- ggviolin(ps.meta, x = "Formal.Team.Meetings.Frequency", y = "Shannon$Shannon",
+               add = "boxplot", fill = "Formal.Team.Meetings.Frequency", palette = color_palette) +
+  theme(legend.position = "none")
+p1
+
+ggsave(filename = "plots/violin-plot-team-meetings.pdf", dpi = 600)
 
 
 # save work
