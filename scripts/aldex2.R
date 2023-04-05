@@ -34,6 +34,7 @@ sig_aldex2 <- aldex2_da %>%
 # add in previously formed taxa information to complete the table
 sig_aldex2 <- left_join(sig_aldex2, taxa_info)
 sig_aldex2
+write.csv(sig_aldex2, file = "tables/aldex-cow-calf.csv")
 
 ggplot(data = sig_aldex2, aes(x = Broadclass, y = effect)) +
   geom_point()
