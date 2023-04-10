@@ -115,7 +115,7 @@ HS
 ggsave(plot = HS, filename = "plots/herd-size.pdf", dpi = 600)
 
 ## Violin Plots ----
-
+# https://microbiome.github.io/tutorials/PlotDiversity.html 
 ps.meta <- meta(ps)
 ps.meta$Shannon <- phyloseq::estimate_richness(ps, measures = "Shannon")
 
