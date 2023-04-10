@@ -123,11 +123,157 @@ ps.meta$'' <- alpha(ps, index = 'shannon')
 
 p1 <- ggviolin(ps.meta, x = "Formal.Team.Meetings.Frequency", y = "Shannon$Shannon",
                add = "boxplot", fill = "Formal.Team.Meetings.Frequency", palette = color_palette) +
-  theme(legend.position = "none")
+  scale_x_discrete(limits = c("Never", "1 or 2 times/year", "Quarterly", "Once a month", "At least twice a month")) +
+  theme(legend.position = "none") + 
+  stat_compare_means(comparisons = FTMF_pair, label = "p.signif",
+                      symnum.args <- list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, Inf), symbols = c("****", "***", "**", "*", "ns"))
+                     )
 p1
 
-ggsave(filename = "plots/violin-plot-team-meetings.pdf", dpi = 600)
+# create a list of pairwise comaprisons
+FTMF <- unique(adiv$TeamMeetings) # get the variables
 
+FTMF_pair <- combn(seq_along(FTMF), 2, simplify = FALSE, FUN = function(i)FTMF[i])
+
+
+p1 <- p1 + stat_compare_means(comparisons = FTMF_pair, label = "p.format",
+                              symnum.args <- list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, Inf), symbols = c("****", "***", "**", "*", "ns"))
+                              )
+p1 
+
+
+ggsave(filename = "plots/violin-plot-team-meetings-stats.pdf", dpi = 600)
+
+# ------------------------------------
+
+v_CO <- ggviolin(ps.meta, x = "Conventional.Organic", y = "Shannon$Shannon",
+               add = "boxplot", fill = "Conventional.Organic", palette = color_palette) +
+  theme(legend.position = "none")
+v_CO
+
+# create a list of pairwise comaprisons
+CO <- unique(adiv$OrgCon) # get the variables
+
+CO_pair <- combn(seq_along(CO), 2, simplify = FALSE, FUN = function(i)CO[i])
+
+
+v_CO <- v_CO + stat_compare_means(comparisons = CO_pair, label = "p.signif",
+                                  symnum.args <- list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, Inf), symbols = c("****", "***", "**", "*", "ns"))
+                                  )
+v_CO
+
+
+ggsave(filename = "plots/conventional-organic-stats.pdf", dpi = 600)
+
+# ------------------------------------
+  
+v_group <- ggviolin(ps.meta, x = "Group", y = "Shannon$Shannon",
+                 add = "boxplot", fill = "Group", palette = color_palette) +
+  theme(legend.position = "none")
+v_group
+
+# create a list of pairwise comaprisons
+group <- unique(adiv$AgeGroup) # get the variables
+
+group_pair <- combn(seq_along(group), 2, simplify = FALSE, FUN = function(i)group[i])
+
+
+v_group <- v_group + stat_compare_means(comparisons = group_pair, label = "p.signif",
+                                  symnum.args <- list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, Inf), symbols = c("****", "***", "**", "*", "ns"))
+)
+v_group
+
+
+ggsave(filename = "plots/cow-calf-stats.pdf", dpi = 600)
+
+
+# ------------------------------------
+  
+v_MF <- ggviolin(ps.meta, x = "Male.Female", y = "Shannon$Shannon",
+                      add = "boxplot", fill = "Male.Female", palette = color_palette) +
+  theme(legend.position = "none")
+v_MF
+
+# create a list of pairwise comaprisons
+MF <- unique(adiv$MF) # get the variables
+
+MF_pair <- combn(seq_along(MF), 2, simplify = FALSE, FUN = function(i)MF[i])
+
+
+v_MF <- v_MF + stat_compare_means(comparisons = MF_pair, label = "p.signif",
+                                        symnum.args <- list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, Inf), symbols = c("****", "***", "**", "*", "ns"))
+)
+v_MF
+
+
+ggsave(filename = "plots/male-female-stats.pdf", dpi = 600)
+
+
+# ------------------------------------
+
+v_MFAG <- ggviolin(ps.meta, x = "Male.Female", y = "Shannon$Shannon",
+                 add = "boxplot", fill = "Group", palette = color_palette)
+ # theme(legend.position = "none")
+v_MFAG
+
+# create a list of pairwise comaprisons
+MFAG <- unique(adiv$AgeGroup) # get the variables
+
+MFAG_pair <- combn(seq_along(MFAG), 2, simplify = FALSE, FUN = function(i)MFAG[i])
+
+
+v_MFAG <- v_MFAG + stat_compare_means(comparisons = MFAG_pair, label = "p.signif",
+                                  symnum.args <- list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, Inf), symbols = c("****", "***", "**", "*", "ns"))
+)
+v_MFAG
+
+
+ggsave(filename = "plots/male-female-stats.pdf", dpi = 600)
+
+
+# ------------------------------------
+
+v_HS <- ggviolin(ps.meta, x = "Herd.Size", y = "Shannon$Shannon",
+                   add = "boxplot", fill = "Herd.Size", palette = color_palette) +
+  scale_x_discrete(limits = c("0-50", "50-100", "100-150", "150-200", "200+"))
+# theme(legend.position = "none")
+v_HS
+
+# create a list of pairwise comaprisons
+HS <- unique(adiv$HerdSize) # get the variables
+
+HS_pair <- combn(seq_along(HS), 2, simplify = FALSE, FUN = function(i)HS[i])
+
+
+v_HS <- v_HS + stat_compare_means(comparisons = HS_pair, label = "p.signif",
+                                      symnum.args <- list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, Inf), symbols = c("****", "***", "**", "*", "ns"))
+)
+v_HS
+
+
+ggsave(filename = "plots/herd-size-stats.pdf", dpi = 600)
+
+
+# ------------------------------------
+
+v_CLB <- ggviolin(ps.meta, x = "Cultural.Language.Barriers", y = "Shannon$Shannon",
+                 add = "boxplot", fill = "Cultural.Language.Barriers", palette = color_palette) +
+                theme(legend.position = "none")
+v_CLB
+
+# create a list of pairwise comaprisons
+CLB <- unique(adiv$LangBarrier) # get the variables
+
+CLB_pair <- combn(seq_along(CLB), 2, simplify = FALSE, FUN = function(i)CLB[i])
+
+
+v_CLB <- v_CLB + stat_compare_means(comparisons = CLB_pair, label = "p.signif",
+                                  symnum.args <- list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, Inf), symbols = c("****", "***", "**", "*", "ns"))
+)
+v_CLB
+
+
+ggsave(filename = "plots/language-barriers-stats.pdf", dpi = 600)
 
 # save work
 save.image("data/alpha-div.RData")
