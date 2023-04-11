@@ -3,12 +3,12 @@ ps <- readRDS("data/ransom/decontam-ps.RDS")
 
 ps <- ps0
 
-ps0@sam_data <- sample_data(samp)
+ps@sam_data <- sample_data(samp)
 
 group <- c("Cows", "Calves")
 
-ps0 <- subset_samples(
-  ps0,
+ps <- subset_samples(
+  ps,
   Group %in% group
 )
 
