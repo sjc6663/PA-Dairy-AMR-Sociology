@@ -57,7 +57,7 @@ colors <- list(
 pheatmap(new.mat, 
            annotation_col = subset(x=meltdf3, select = c("Male.Female", "Group")),
            annotation_row = subset(x=meltdf3, select = "Broadclass"),
-          # cluster_cols = hclust(dist(t(out), method = "euclidean")), 
+           #cluster_cols = hclust(dist(t(out), method = "euclidean")), 
            cluster_rows = F,
            annotation_colors = colors,
            color = inferno(15),
@@ -66,5 +66,6 @@ pheatmap(new.mat,
            annotation_legend = F,
            legend = T,
            show_rownames = TRUE,
-           border_color = "black")
+           border_color = "black",
+          show_colnames = FALSE)
 
