@@ -11,6 +11,7 @@ library(ggplot2)
 library(viridis)
 library(BiocManager)
 library(stringr)
+library(microshades)
 
 # read in phyloseq object
 ps <- readRDS("data/full-run/decontam-ps.RDS")

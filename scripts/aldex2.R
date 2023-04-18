@@ -5,6 +5,8 @@ require(tidyverse)
 require(phyloseq)
 library(ALDEx2)
 library(microViz)
+library(ggpubr)
+library(ggrepel)
 
 # load phyloseq of counts
 # load("ps-decontam-filtered-counts.RData")
