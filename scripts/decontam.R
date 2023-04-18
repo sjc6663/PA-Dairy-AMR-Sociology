@@ -63,7 +63,7 @@ contams
 # remove contaminant sequences
 nocontam <- prune_taxa(!rownames(ps@tax_table) %in% contams, ps)
 
-saveRDS(nocontam, "data/ransom/decontam-ps.rds")
+saveRDS(nocontam, "data/full-run/decontam-ps.rds")
 
 ## Positive Control ----
 
@@ -112,7 +112,7 @@ psfilt <- subset_samples(
 )
 
 # save the decontaminated phyloseq object for downstrem analysis
-saveRDS(psfilt, file = "data/ransom/decontam-ps.rds")
+saveRDS(psfilt, file = "data/full-run/decontam-ps.rds")
 
 # save work
 save.image("data/decontam.RData")

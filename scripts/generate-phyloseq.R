@@ -1,6 +1,6 @@
 #Integration of AMR++ output into phyloseq object for downstream analysis 
 #Stephanie Bierly - 3/15/23 
-​
+
 #laod packges
 library(BiocManager)
 library(stringr)
@@ -13,8 +13,7 @@ library(phyloseq)
 library(vegan) # version 2.6-4
 library(ggplot2)
 library(readxl)
-​
-​
+
 #my filtering mess that yall dont need to see---- 
 countsDF <- read.delim("tables/countmatrix-cleanedall.txt", sep = "\t") 
 met <- read.delim("batchinfo/meta/meta-both.txt")
@@ -56,68 +55,28 @@ test <- test[, -grep(paste(dupelist[8]), colnames(test))]
 #write.table(test, "tables/countmatrix-duperm.txt", sep = "\t")
 ​
 #read in necessary files: count matrix, gene info, metadata---- 
-countsDF <- read.delim("data/ransom/ransom-countmatrix-cleanedall.txt", sep = "\t") 
+countsDF <- read.delim("/Users/stephanieclouser/OneDrive - The Pennsylvania State University/Shared-Projects/Ransom-AMR/7.Data-Analysis/SK_Prelim/countmatrix-cleanedall.txt", sep = "\t") 
 met <- read_excel("/Users/stephanieclouser/OneDrive - The Pennsylvania State University/Shared-Projects/Ransom-AMR/3.Sample-Collection/Ransom-AMR-Metadata.xlsx")
-genes <- read.delim("data/ransom/ransom-geneinfo-all.txt", sep = "\t") %>%
+genes <- read.delim("/Users/stephanieclouser/OneDrive - The Pennsylvania State University/Shared-Projects/Ransom-AMR/7.Data-Analysis/SK_Prelim/geneinfo-all.txt", sep = "\t") %>%
   select(-c(MEG_ID)) %>%
   unique()
-​
+
 counts <- as.matrix(countsDF)
 otutab <- phyloseq::otu_table(counts, taxa_are_rows = TRUE)
-​
+
 tax <- as.matrix(genes)
 rownames(tax) <- genes$Gene
 taxtab <- phyloseq::tax_table(tax)
 taxa_names(taxtab)
-​
+
 samp <- phyloseq::sample_data(met)
 rownames(samp) <- met$`Sample-ID`
-​
+
 ps <- phyloseq::phyloseq(otutab, taxtab, samp)
 
-ps <- phyloseq::phyloseq(samp)
 
 #save the ps object 
-saveRDS(ps, "data/ransom/rawps.rds")
-​
-​
-​
-​
+saveRDS(ps, "data/full-run/rawps.rds")
+
 #save work ----
 save.image("data/making-psobj.RData")
-​
-​
-​
-​
-#probably next week or wed----
-df <- as.data.frame(sample_data(ps))
-df$GeneCounts <- sample_sums(ps)
-df <- df[order(df$GeneCounts), ]
-df$Index <- seq(nrow(df))
-p_genecount <- ggplot(data = df, aes(x = Index, y = GeneCounts, color = Male.Female)) +
-  geom_point() +
-  ggtitle("Gene Counts")
-p_genecount
-
-# test to see what samples came through and if we need to do decontam----
-
-plot_bar(ps, x = "Male.Female")
-sample_data(ps)$Sample.Type # Sample, Extra-Sample, Positive Control, and Negative Control 
-
-pc <- subset_samples(
-  ps,
-  Sample.Type == "Positive-Control"
-)
-otu_table(pc) # there are a bunch of genes that have counts 
-plot_bar(pc, x = "Sample.ID")
-
-nc <- subset_samples(
-  ps,
-  Sample.Type == "Negative-Control"
-) 
-otu_table(nc) # there is one gene that I can see that has counts A16S|RequiresSNPConfirmation R80 - 31, R79 - 2
-
-MINREADS = 1
-
-ncdf <- as.data.frame(sample_data(nc))
-plot_bar(nc, x = "Sample.ID")
