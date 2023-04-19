@@ -16,10 +16,6 @@ ps <- readRDS("data/full-run/decontam-ps.RDS")
 # color scheme: Viridis mako / microshades micro_cvd_blue
 color_palette <- c("#BCE1FF", "#7DCCFF", "#56B4E9", "#098BD9", "#4292C6")
 
-# test normality ----
-
-
-
 ## Age Group ----
 # run AlDEx2 function
 aldex2_da_G <- ALDEx2::aldex(data.frame(phyloseq::otu_table(ps)), phyloseq::sample_data(ps)$Group, taxa_rank = "all", norm = "CLR", method = "t.test", p_adjust = "BH", pvalue_cutoff = 0.05, mc_samples = 128, denom = "iqlr")
@@ -173,7 +169,7 @@ ggsave(filename = "plots/aldex2-cow-calf.pdf", dpi = 600)
 
 
 
-### TESTING ----
+### TESTING FOR FUTURE ANALYSIS IF I CAN GET IT TO WORK ----
 test <- ALDEx2::aldex(data.frame(phyloseq::otu_table(ps)), phyloseq::sample_data(ps)$Formal.Team.Meetings.Frequency, taxa_rank = "all", norm = "CLR", method = "kruskal", p_adjust = "BH", pvalue_cutoff = 0.05, mc_samples = 128, denom = "iqlr")
 
 
