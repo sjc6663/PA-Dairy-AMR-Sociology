@@ -1,6 +1,6 @@
 ## BETA DIVERSITY
 
-ps <- readRDS("data/ransom/decontam-ps.RDS")
+ps <- readRDS("data/full-run/decontam-ps.RDS")
 
 colors <- c("#BCF5F9", "#89C5FD", "#3A80EC", "#0229BF", "#080B6C")
 
@@ -21,7 +21,7 @@ OTU3 <- rownames_to_column(OTU2, var = "sample.id.2")
 
 dist_mat <- phyloseq::distance(transps, method = "euclidean")
 
-vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Male.Female) # p = 0.077, not sig
+vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Male.Female) # p = 0.303, not sig
 vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Group) # p = 0.001***
 vegan::adonis2(dist_mat ~ Group*Male.Female, data = OTU3) # p (Group:Male.Female) = 0.559, not sig
 vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Herd.Size) # p = 0.639, not sig
@@ -40,7 +40,7 @@ A_soc <- psrel %>%
   stat_ellipse(aes(group = Male.Female, color = Male.Female)) + 
   theme_classic() +
   ggtitle("A") + 
-  labs(caption = "R2 = 0.016, F(1,70) = 1.17 , P = 0.08")
+  labs(caption = "R2 = 0.016, F(1,70) = 1.07, P = 0.30")
 A_soc
 
 ggsave(filename = "plots/full-run/PCA-male-female.pdf", dpi = 600)
@@ -55,7 +55,7 @@ B_soc <- psrel %>%
   stat_ellipse(aes(group = Group, color = Group)) + 
   theme_classic() +
   ggtitle("B") + 
-  labs(caption = "R2 = 0.013, F(1, 68) = 0.98, P = 0.56")
+  labs(caption = "R2 = 0.011, F(1, 68) = 0.85, P = 0.63")
 
 ggsave(filename = "plots/full-run/PCA-male-female-age-group.pdf", dpi = 600)
 
@@ -74,7 +74,7 @@ C_soc <- psrel %>%
   stat_ellipse(aes(group = Formal.Team.Meetings.Frequency, color = Formal.Team.Meetings.Frequency)) + 
   theme_classic() +
   ggtitle("C") + 
-  labs(caption = "R2 = 0.051, F(4, 67) = 0.90, P = 0.97")
+  labs(caption = "R2 = 0.057, F(4, 67) = 1.01, P = 0.40")
 
 C_soc
 
@@ -90,7 +90,7 @@ D_soc <- psrel %>%
   stat_ellipse(aes(group = Cultural.Language.Barriers, color = Cultural.Language.Barriers)) + 
   theme_classic() +
   ggtitle("D") + 
-  labs(caption = "R2 = 0.012, F(1, 70) = 0.84, P = 0.96")
+  labs(caption = "R2 = 0.016, F(1, 70) = 1.14, P = 0.22")
 
 D_soc
 
@@ -101,7 +101,7 @@ library(patchwork)
 
 (A_soc | B_soc) / (C_soc | D_soc)
 
-ggsave(filename = "plots/full-run/PCA-soc-plots.pdf", dpi = 600)
+ggsave(filename = "plots/full-run/PCA-soc-plots.pdf", dpi = 600, height = 10, width = 12)
 
 
 ##  PCA plot - Farm Type  ----
@@ -114,7 +114,7 @@ A_farm <- psrel %>%
   stat_ellipse(aes(group = Conventional.Organic, color = Conventional.Organic)) + 
   theme_classic() +
   ggtitle("A") + 
-  labs(caption = "R2 = 0.015, F(1, 70) = 1.09, P = 0.16") 
+  labs(caption = "R2 = 0.017, F(1, 70) = 1.20, P = 0.17") 
 
 A_farm
 
@@ -130,7 +130,7 @@ B_farm <- psrel %>%
   stat_ellipse(aes(group = Group, color = Group)) + 
   theme_classic() +
   ggtitle("B") + 
-  labs(caption = "R2 = 0.031, F(1, 70) = , P = 0.001***") 
+  labs(caption = "R2 = 0.068, F(1, 70) = 5.08, P = 0.001***, ") 
 
 B_farm
 
@@ -150,7 +150,7 @@ C_farm <- psrel %>%
   stat_ellipse(aes(group = Herd.Size, color = Herd.Size)) + 
   theme_classic() +
   ggtitle("C") + 
-  labs(caption = "R2 = 0.055, F(4, 67) = 0.97, P = 0.63") +
+  labs(caption = "R2 = 0.078, F(4, 67) = 1.42, P = 0.11") +
   theme(legend.position = "bottom")
 
 C_farm
@@ -161,4 +161,4 @@ ggsave(filename = "plots/full-run/PCA-herd-size.pdf", dpi = 600)
 
 (A_farm | B_farm) / C_farm
 
-ggsave(filename = "plots/full-run/PCA-farm-stats.pdf", dpi = 600)
+ggsave(filename = "plots/full-run/PCA-farm-stats.pdf", dpi = 600, width = 12, height = 10)
