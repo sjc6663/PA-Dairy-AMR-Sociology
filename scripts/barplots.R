@@ -65,19 +65,19 @@ A <- ggplot(out2, aes(x=Broadclass, fill = Sample.Type)) +
   labs(x = "",
        y = "Number of AMRg",
        fill = " ",
-       title = "A") +
+       title = " ") +
   theme(axis.text= element_text(size = 12,face = "bold"),
         axis.title= element_text(size = 12, face = "bold"),
         legend.text = element_text(size = 12),
         legend.title = element_text(size = 15, face = "bold", hjust = 0),
         legend.position = "none",
         strip.background = element_rect(fill = "white"),
-        strip.text.x = element_text(size = 12, color = "black",face = "bold")
+        strip.text.x = element_text(size = 12, color = "black",face = "bold")+
   ) +
   #guides(fill="none")+
-  #scale_y_continuous(expand = c(0,0.1), limits = c(0,7500))+
+  scale_y_continuous(expand = c(0,0.1), limits = c(0,20000))+
   coord_flip()
-
+A
 ggsave(filename = "plots/full-run/MF.pdf", dpi = 600)
 
 A|B|C
@@ -93,7 +93,7 @@ B <- ggplot(out2, aes(x=Broadclass, fill = Sample.Type)) +
   labs(x = "",
        y = "Number of AMRg",
        fill = " ",
-       title = "B") +
+       title = "A") +
   theme(axis.text= element_text(size = 12,face = "bold"),
         axis.title= element_text(size = 12, face = "bold"),
         legend.text = element_text(size = 12),
@@ -121,7 +121,7 @@ HS <- ggplot(out2, aes(x=Broadclass, fill = Herd.Size)) +
   labs(x = "",
        y = "Number of AMRg",
        fill = "Herd Size",
-       title = "A") +
+       title = "C") +
   theme(axis.text= element_text(size = 12,face = "bold"),
         axis.title= element_text(size = 12, face = "bold"),
         legend.text = element_text(size = 12),
@@ -159,8 +159,8 @@ OC <- ggplot(out2, aes(x=Broadclass, fill = Conventional.Organic)) +
   coord_flip()
 
 ggsave(filename = "plots/full-run/con-org.pdf", dpi = 600)
-
-HS | OC
+library(patchwork)
+B | OC | HS
 
 ggsave(filename = "plots/full-run/soc-barplot.pdf", dpi = 600, height = 12, width = 18)
 
