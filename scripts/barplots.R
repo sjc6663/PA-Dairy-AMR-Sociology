@@ -247,7 +247,7 @@ psclass %>% plot_composition(group_by = "Male.Female") +
   # theme(legend.position = "none") +
   scale_fill_viridis(option = "mako", discrete = TRUE)
 
-ggsave(filename = "plots/full-run/relabund-all-samples.pdf", dpi = 600, width = 30, height = 18)
+ggsave(filename = "plots/full-run/relabund-all-samples.pdf", dpi = 600, width = 18, height = 12)
 
 
 psclass %>% plot_composition(group_by = "Herd.Size") +
@@ -256,7 +256,7 @@ psclass %>% plot_composition(group_by = "Herd.Size") +
   scale_fill_viridis(option = "mako", discrete = TRUE) +
   ggtitle("Herd Size")
 
-ggsave(filename = "plots/full-run/relabund-all-samples-herd-size.pdf", dpi = 600, width = 30, height = 18)
+ggsave(filename = "plots/full-run/relabund-all-samples-herd-size.pdf", dpi = 600, width = 20, height = 12)
 
 
 psclass %>% plot_composition(group_by = "Group") +
@@ -265,7 +265,7 @@ psclass %>% plot_composition(group_by = "Group") +
   scale_fill_viridis(option = "mako", discrete = TRUE) +
   ggtitle("Age Group")
 
-ggsave(filename = "plots/full-run/relabund-all-samples-group.pdf", dpi = 600, width = 30, height = 18)
+ggsave(filename = "plots/full-run/relabund-all-samples-group.pdf", dpi = 600, width = 18, height = 12)
 
 
 psbclass <- aggregate_taxa(psrel, level = "Broadclass")
