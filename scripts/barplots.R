@@ -27,6 +27,7 @@ out2 <- meltdf[meltdf$Abundance != 0.0000000000, ]
 out3 <- meltdf2[meltdf2$Abundance != 0.0000000000, ]
 
 write.csv(meltdf, file = "tables/melted-phyloseq.csv")
+write.csv(meltdf2, file = "tables/melted-phyloseq-relabund.csv")
 
 
 ### ------------------------------------------------------------------------
@@ -222,6 +223,80 @@ ggsave(filename = "plots/full-run/lang-barriers.pdf", dpi = 600)
 TM | LB
 
 ggsave(filename = "plots/full-run/soc-barplots-2.pdf", dpi = 600, width = 18, height = 12)
+
+
+### Relative Abundance by Percent (Normalized Data) ----
+library(microbiome)
+
+psclass <- aggregate_taxa(psrel, level = "Class")
+
+# fix taxa for aesthetics
+# find and substitute
+taxa_names(psclass) <- gsub(taxa_names(psclass), pattern = "_", replacement = " ") 
+
+psclass %>% plot_composition(average_by = "Male.Female") +
+  # scale_y_continuous(labels = percent) +
+  # theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE)
+
+ggsave(filename = "plots/full-run/relabund-averaged.pdf", dpi = 600, width = 24, height = 12)
+
+
+psclass %>% plot_composition(group_by = "Male.Female") +
+  # scale_y_continuous(labels = percent) +
+  # theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE)
+
+ggsave(filename = "plots/full-run/relabund-all-samples.pdf", dpi = 600, width = 30, height = 18)
+
+
+psclass %>% plot_composition(group_by = "Herd.Size") +
+  # scale_y_continuous(labels = percent) +
+  # theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  ggtitle("Herd Size")
+
+ggsave(filename = "plots/full-run/relabund-all-samples-herd-size.pdf", dpi = 600, width = 30, height = 18)
+
+
+psclass %>% plot_composition(group_by = "Group") +
+  # scale_y_continuous(labels = percent) +
+  # theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  ggtitle("Age Group")
+
+ggsave(filename = "plots/full-run/relabund-all-samples-group.pdf", dpi = 600, width = 30, height = 18)
+
+
+psbclass <- aggregate_taxa(psrel, level = "Broadclass")
+
+# find and substitute
+taxa_names(psbclass) <- gsub(taxa_names(psbclass), pattern = "_", replacement = " ") 
+
+psbclass %>% plot_composition(average_by = "Male.Female") +
+  # scale_y_continuous(labels = percent) +
+  # theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  ggtitle("Primary Manager Gender")
+
+ggsave(filename = "plots/full-run/relabund-averaged-bclass-gender.pdf", dpi = 600, width = 12, height = 14)
+
+
+psbclass %>% plot_composition(average_by = "Herd.Size") +
+  # scale_y_continuous(labels = percent) +
+  # theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE)
+
+ggsave(filename = "plots/full-run/relabund-averaged-bclass-herd-size.pdf", dpi = 600, width = 12, height = 14)
+
+psbclass %>% plot_composition(average_by = "Group") +
+  # scale_y_continuous(labels = percent) +
+  # theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE)
+
+ggsave(filename = "plots/full-run/relabund-averaged-bclass-agegroup.pdf", dpi = 600, width = 12, height = 14)
+
+
 
 # save work ----
 save.image("data/beta-div.RData")
