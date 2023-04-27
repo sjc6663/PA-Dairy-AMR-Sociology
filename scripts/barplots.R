@@ -348,8 +348,8 @@ taxa_names(psbclass) <- gsub(taxa_names(psbclass), pattern = "_", replacement = 
 gender2 <- psbclass %>% plot_composition(average_by = "Male.Female") +
   # scale_y_continuous(labels = percent) +
   # theme(legend.position = "none") +
-  scale_fill_viridis(option = "mako", discrete = TRUE) +
-  ggtitle("A")
+  scale_fill_manual(values = color_palette) +
+  ggtitle("D")
 
 ggsave(filename = "plots/full-run/relabund-averaged-bclass-gender.pdf", dpi = 600, width = 12, height = 14)
 
@@ -357,7 +357,7 @@ ggsave(filename = "plots/full-run/relabund-averaged-bclass-gender.pdf", dpi = 60
 size2 <- psbclass %>% plot_composition(average_by = "Herd.Size") +
   # scale_y_continuous(labels = percent) +
   # theme(legend.position = "none") +
-  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  scale_fill_manual(values = color_palette) +
   ggtitle("C")
 
 ggsave(filename = "plots/full-run/relabund-averaged-bclass-herd-size.pdf", dpi = 600, width = 12, height = 14)
@@ -365,7 +365,7 @@ ggsave(filename = "plots/full-run/relabund-averaged-bclass-herd-size.pdf", dpi =
 group <- psbclass %>% plot_composition(average_by = "Group") +
   # scale_y_continuous(labels = percent) +
   # theme(legend.position = "none") +
-  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  scale_fill_manual(values = color_palette) +
   ggtitle("A")
 
 ggsave(filename = "plots/full-run/relabund-averaged-bclass-agegroup.pdf", dpi = 600, width = 12, height = 14)
@@ -373,7 +373,7 @@ ggsave(filename = "plots/full-run/relabund-averaged-bclass-agegroup.pdf", dpi = 
 farmT <- psbclass %>% plot_composition(average_by = "Conventional.Organic") +
   # scale_y_continuous(labels = percent) +
   # theme(legend.position = "none") +
-  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  scale_fill_manual(values = color_palette) +
   ggtitle("B")
 
 ggsave(filename = "plots/full-run/relabund-averaged-bclass-farmtype.pdf", dpi = 600, width = 12, height = 14)
@@ -384,8 +384,8 @@ sample_data(psbclass)$Formal.Team.Meetings.Frequency <- factor(sample_data(psbcl
 meetings2 <- psbclass %>% plot_composition(average_by = "Formal.Team.Meetings.Frequency") +
   # scale_y_continuous(labels = percent) +
   # theme(legend.position = "none") +
-  scale_fill_viridis(option = "mako", discrete = TRUE) +
-  ggtitle("C")
+  scale_fill_manual(values = color_palette) +
+  ggtitle("F")
 
 ggsave(filename = "plots/full-run/relabund-averaged-bclass-teammeetings.pdf", dpi = 600, width = 12, height = 14)
 
@@ -393,8 +393,8 @@ ggsave(filename = "plots/full-run/relabund-averaged-bclass-teammeetings.pdf", dp
 language2 <- psbclass %>% plot_composition(average_by = "Cultural.Language.Barriers") +
   # scale_y_continuous(labels = percent) +
   # theme(legend.position = "none") +
-  scale_fill_viridis(option = "mako", discrete = TRUE) +
-  ggtitle("D")
+  scale_fill_manual(values = color_palette) +
+  ggtitle("G")
 
 ggsave(filename = "plots/full-run/relabund-averaged-bclass-langbarrier.pdf", dpi = 600, width = 12, height = 14)
 
@@ -405,13 +405,13 @@ ggsave(filename = "plots/full-run/averaged-relabund-farm-details.pdf", dpi = 600
 A2 <- calves %>% plot_composition(average_by = "Male.Female") +
   # scale_y_continuous(labels = percent) +
   theme(legend.position = "none") +
-  scale_fill_viridis(option = "mako", discrete = TRUE) +
-  ggtitle("B Calves")
+  scale_fill_manual(values = color_palette) +
+  ggtitle("E Calves")
 
 B2 <- cows %>% plot_composition(average_by = "Male.Female") +
   # scale_y_continuous(labels = percent) +
   # theme(legend.position = "none") +
-  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  scale_fill_manual(values = color_palette) +
   ggtitle("Cows")
 
 MFAG2 <- A2|B2
@@ -421,6 +421,10 @@ ggsave(filename = "plots/full-run/averaged-relabund-cows-calves-gender.pdf", dpi
 gender2 / MFAG2 / meetings2 / language2
 
 ggsave(filename = "plots/full-run/averaged-relabund-soc-details.pdf", dpi = 600, width = 12, height = 14)
+
+(group / farmT / size2)  | (gender2 / MFAG2 / meetings2 / language2)
+
+ggsave(filename = "plots/full-run/averaged-all-details.pdf", dpi = 600, width = 24, height = 30)
 
 # save work ----
 save.image("data/beta-div.RData")
