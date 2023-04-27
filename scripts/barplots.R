@@ -234,32 +234,61 @@ psclass <- aggregate_taxa(psrel, level = "Class")
 # find and substitute
 taxa_names(psclass) <- gsub(taxa_names(psclass), pattern = "_", replacement = " ") 
 
-psclass %>% plot_composition(average_by = "Male.Female") +
+gender <- psbclass %>% plot_composition(group_by = "Male.Female") +
   # scale_y_continuous(labels = percent) +
   # theme(legend.position = "none") +
-  scale_fill_viridis(option = "mako", discrete = TRUE)
+  scale_fill_viridis(option = "mako", discrete = TRUE) + 
+  ggtitle("A")
 
 ggsave(filename = "plots/full-run/relabund-averaged.pdf", dpi = 600, width = 24, height = 12)
 
-
-psclass %>% plot_composition(group_by = "Male.Female") +
-  # scale_y_continuous(labels = percent) +
-  # theme(legend.position = "none") +
-  scale_fill_viridis(option = "mako", discrete = TRUE)
-
-ggsave(filename = "plots/full-run/relabund-all-samples.pdf", dpi = 600, width = 18, height = 12)
-
-
-psclass %>% plot_composition(group_by = "Herd.Size") +
+age <- psbclass %>% plot_composition(group_by = "Group") +
   # scale_y_continuous(labels = percent) +
   # theme(legend.position = "none") +
   scale_fill_viridis(option = "mako", discrete = TRUE) +
-  ggtitle("Herd Size")
+  ggtitle("A")
 
-ggsave(filename = "plots/full-run/relabund-all-samples-herd-size.pdf", dpi = 600, width = 20, height = 12)
+ggsave(filename = "plots/full-run/relabund-total-bclass-group.pdf", dpi = 600, width = 24, height = 12)
+
+calves <- subset_samples(
+  psbclass,
+  Group == "Calves"
+)
+
+cows <- subset_samples(
+  psbclass,
+  Group == "Cows"
+)
+
+A <- calves %>% plot_composition(group_by = "Male.Female") +
+  # scale_y_continuous(labels = percent) +
+  theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  ggtitle("B Calves")
+
+B <- cows %>% plot_composition(group_by = "Male.Female") +
+  # scale_y_continuous(labels = percent) +
+  # theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  ggtitle("Cows")
+
+MFAG <- A|B
+
+ggsave(filename = "plots/full-run/relabund-bclass-all-samples-group-gender.pdf", dpi = 600, width = 18, height = 12)
+
+sample_data(psbclass)$Herd.Size <- factor(sample_data(psbclass)$Herd.Size,
+                         levels = c("0-50", "50-100", "100-150", "150-200", "200+"))
+
+size <- psbclass %>% plot_composition(group_by = "Herd.Size") +
+  # scale_y_continuous(labels = percent) +
+  # theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  ggtitle("C")
+
+ggsave(filename = "plots/full-run/relabund-all-samples-bclass-herd-size.pdf", dpi = 600, width = 20, height = 12)
 
 
-psclass %>% plot_composition(group_by = "Group") +
+psbclass %>% plot_composition(group_by = "Group") +
   # scale_y_continuous(labels = percent) +
   # theme(legend.position = "none") +
   scale_fill_viridis(option = "mako", discrete = TRUE) +
@@ -267,42 +296,147 @@ psclass %>% plot_composition(group_by = "Group") +
 
 ggsave(filename = "plots/full-run/relabund-all-samples-group.pdf", dpi = 600, width = 18, height = 12)
 
+type <- psbclass %>% plot_composition(group_by = "Conventional.Organic") +
+  # scale_y_continuous(labels = percent) +
+  # theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  ggtitle("B")
+
+ggsave(filename = "plots/full-run/relabund-all-samples-bclass-farm-type.pdf", dpi = 600, width = 20, height = 12)
+
+language <- psbclass %>% plot_composition(group_by = "Cultural.Language.Barriers") +
+  # scale_y_continuous(labels = percent) +
+  # theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  ggtitle("D")
+
+ggsave(filename = "plots/full-run/relabund-all-samples-bclass-langbarrier.pdf", dpi = 600, width = 20, height = 12)
+
+
+sample_data(psbclass)$Formal.Team.Meetings.Frequency <- factor(sample_data(psbclass)$Formal.Team.Meetings.Frequency,
+                                              levels = c("Never", "1 or 2 times/year", "Quarterly", "Once a month", "At least twice a month"))
+
+
+meetings <- psbclass %>% plot_composition(group_by = "Formal.Team.Meetings.Frequency") +
+  # scale_y_continuous(labels = percent) +
+  # theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  ggtitle("Team Meeting Frequency") +
+  ggtitle("C")
+
+ggsave(filename = "plots/full-run/relabund-all-samples-bclass-teammeetings.pdf", dpi = 600, width = 20, height = 12)
+
+
+age / type / size
+
+ggsave(filename = "plots/full-run/relabund-farm-details.pdf", dpi = 600, width = 20, height = 24)
+
+
+gender / MFAG / meetings / language
+
+ggsave(filename = "plots/full-run/relabund-soc-details.pdf", dpi = 600, width = 20, height = 24)
+
+
+## BROADCLASS GROUP 
+
 
 psbclass <- aggregate_taxa(psrel, level = "Broadclass")
 
 # find and substitute
 taxa_names(psbclass) <- gsub(taxa_names(psbclass), pattern = "_", replacement = " ") 
 
-psbclass %>% plot_composition(average_by = "Male.Female") +
+gender2 <- psbclass %>% plot_composition(average_by = "Male.Female") +
   # scale_y_continuous(labels = percent) +
   # theme(legend.position = "none") +
   scale_fill_viridis(option = "mako", discrete = TRUE) +
-  ggtitle("Primary Manager Gender")
+  ggtitle("A")
 
 ggsave(filename = "plots/full-run/relabund-averaged-bclass-gender.pdf", dpi = 600, width = 12, height = 14)
 
 
-psbclass %>% plot_composition(average_by = "Herd.Size") +
+size2 <- psbclass %>% plot_composition(average_by = "Herd.Size") +
   # scale_y_continuous(labels = percent) +
   # theme(legend.position = "none") +
-  scale_fill_viridis(option = "mako", discrete = TRUE)
+  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  ggtitle("C")
 
 ggsave(filename = "plots/full-run/relabund-averaged-bclass-herd-size.pdf", dpi = 600, width = 12, height = 14)
 
-psbclass %>% plot_composition(average_by = "Group") +
+group <- psbclass %>% plot_composition(average_by = "Group") +
   # scale_y_continuous(labels = percent) +
   # theme(legend.position = "none") +
-  scale_fill_viridis(option = "mako", discrete = TRUE)
+  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  ggtitle("A")
 
 ggsave(filename = "plots/full-run/relabund-averaged-bclass-agegroup.pdf", dpi = 600, width = 12, height = 14)
 
+farmT <- psbclass %>% plot_composition(average_by = "Conventional.Organic") +
+  # scale_y_continuous(labels = percent) +
+  # theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  ggtitle("B")
 
+ggsave(filename = "plots/full-run/relabund-averaged-bclass-farmtype.pdf", dpi = 600, width = 12, height = 14)
+
+sample_data(psbclass)$Formal.Team.Meetings.Frequency <- factor(sample_data(psbclass)$Formal.Team.Meetings.Frequency,
+                                                              levels = c("Never", "1 or 2 times/year", "Quarterly", "Once a month", "At least twice a month"))
+
+meetings2 <- psbclass %>% plot_composition(average_by = "Formal.Team.Meetings.Frequency") +
+  # scale_y_continuous(labels = percent) +
+  # theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  ggtitle("C")
+
+ggsave(filename = "plots/full-run/relabund-averaged-bclass-teammeetings.pdf", dpi = 600, width = 12, height = 14)
+
+
+language2 <- psbclass %>% plot_composition(average_by = "Cultural.Language.Barriers") +
+  # scale_y_continuous(labels = percent) +
+  # theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  ggtitle("D")
+
+ggsave(filename = "plots/full-run/relabund-averaged-bclass-langbarrier.pdf", dpi = 600, width = 12, height = 14)
+
+group / farmT / size2
+
+ggsave(filename = "plots/full-run/averaged-relabund-farm-details.pdf", dpi = 600, width = 12, height = 16)
+
+A2 <- calves %>% plot_composition(average_by = "Male.Female") +
+  # scale_y_continuous(labels = percent) +
+  theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  ggtitle("B Calves")
+
+B2 <- cows %>% plot_composition(average_by = "Male.Female") +
+  # scale_y_continuous(labels = percent) +
+  # theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  ggtitle("Cows")
+
+MFAG2 <- A2|B2
+
+ggsave(filename = "plots/full-run/averaged-relabund-cows-calves-gender.pdf", dpi = 600, width = 12, height = 14)
+
+gender2 / MFAG2 / meetings2 / language2
+
+ggsave(filename = "plots/full-run/averaged-relabund-soc-details.pdf", dpi = 600, width = 12, height = 14)
 
 # save work ----
 save.image("data/beta-div.RData")
 
+## MECHANISM
+
+psmclass <- aggregate_taxa(psrel, level = "Mechanism")
+
+# find and substitute
+taxa_names(psmclass) <- gsub(taxa_names(psmclass), pattern = "_", replacement = " ") 
 
 
+psmclass %>% plot_composition(average_by = "Male.Female") +
+  # scale_y_continuous(labels = percent) +
+  #theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE)
 
-
+ggsave(filename = "plots/full-run/relabund-averaged-mechanism-gender.pdf", dpi = 600, width = 12, height = 14)
 
