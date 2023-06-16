@@ -31,8 +31,8 @@ psrel %>%
   # when no distance matrix or constraints are supplied, PCA is the default/auto ordination method
   tax_transform(trans = "clr") %>%
   ord_calc(method = "PCA") %>% 
-  ord_plot(color = "pointcolor") +
-  scale_color_manual(values = c("blue", "gray")) +
+  ord_plot(color = "pointcolor", size = 3) +
+  scale_color_manual(values = c("red", "gray")) +
   # stat_ellipse(aes(group = Male.Female, color = Male.Female)) + 
   theme_classic() +
   theme(legend.position = "none") +
@@ -52,8 +52,8 @@ psrel %>%
   # when no distance matrix or constraints are supplied, PCA is the default/auto ordination method
   tax_transform(trans = "clr") %>%
   ord_calc(method = "PCA") %>% 
-  ord_plot(color = "pointcolor") +
-  scale_color_manual(values = c("blue", "gray")) +
+  ord_plot(color = "pointcolor", size = 3) +
+  scale_color_manual(values = c("red", "gray")) +
   # stat_ellipse(aes(group = Male.Female, color = Male.Female)) + 
   theme_classic() +
   theme(legend.position = "none") +

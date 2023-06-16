@@ -430,6 +430,8 @@ ggsave(filename = "plots/full-run/averaged-all-details.pdf", dpi = 600, width = 
 save.image("data/beta-div.RData")
 
 ## MECHANISM
+test <- psrel@tax_table %>% 
+  mutate(beta = if_else(str_detect(Class, "betalactams"), true = "Yes", false = "No"))
 
 psmclass <- aggregate_taxa(psrel, level = "Mechanism")
 
@@ -439,8 +441,29 @@ taxa_names(psmclass) <- gsub(taxa_names(psmclass), pattern = "_", replacement = 
 
 psmclass %>% plot_composition(average_by = "Male.Female") +
   # scale_y_continuous(labels = percent) +
-  #theme(legend.position = "none") +
+  theme(legend.position = "none") +
   scale_fill_viridis(option = "mako", discrete = TRUE)
 
 ggsave(filename = "plots/full-run/relabund-averaged-mechanism-gender.pdf", dpi = 600, width = 12, height = 14)
 
+psbclass %>% plot_composition(average_by = "Farm", group_by = "Cultural.Language.Barriers") +
+  # scale_y_continuous(labels = percent) +
+  #theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE)
+
+beta <- subset_taxa(
+  psmclass,
+  Class == "betalactams")
+
+amino <- subset_taxa(
+  psmclass,
+  Class == "Aminoglycosides")
+
+tax_table(beta)
+
+fluoro %>% plot_composition(average_by = "Farm", group_by = "Conventional.Organic") +
+  # scale_y_continuous(labels = percent) +
+  #theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE)
+
+test <- mutate_tax_table(psmclass, dplyr::mutate(beta = if_else(str_detect(Class, "betalactams"), true = "Yes", false = "No")))
