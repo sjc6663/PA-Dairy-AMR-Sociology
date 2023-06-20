@@ -12,6 +12,7 @@ library(viridis)
 library(BiocManager)
 library(stringr)
 library(microshades)
+library(microbiome)
 
 # read in phyloseq object
 ps <- readRDS("data/full-run/decontam-ps.RDS")
@@ -435,9 +436,12 @@ test <- psrel@tax_table %>%
 
 psmclass <- aggregate_taxa(psrel, level = "Mechanism")
 
+psgclass <- aggregate_taxa(psrel, level = "Gene")
+
 # find and substitute
 taxa_names(psmclass) <- gsub(taxa_names(psmclass), pattern = "_", replacement = " ") 
 
+tax_table(psgclass)
 
 psmclass %>% plot_composition(average_by = "Male.Female") +
   # scale_y_continuous(labels = percent) +
@@ -452,17 +456,41 @@ psbclass %>% plot_composition(average_by = "Farm", group_by = "Cultural.Language
   scale_fill_viridis(option = "mako", discrete = TRUE)
 
 beta <- subset_taxa(
-  psmclass,
+  psgclass,
   Class == "betalactams")
 
 amino <- subset_taxa(
-  psmclass,
+  psgclass,
   Class == "Aminoglycosides")
+
+fluoro <- subset_taxa(
+  psgclass,
+  Class == "Fluoroquinolones")
+
+fosfo <- subset_taxa(
+  psgclass,
+  Class == "Fosfomycin")
+
+glyco <- subset_taxa(
+  psgclass,
+  Class == "Glycopeptides")
+
+lipo <- subset_taxa(
+  psgclass,
+  Class == "Lipopeptides")
+
+mls <- subset_taxa(
+  psgclass,
+  Class == "MLS")
+
+rif <- subset_taxa(
+  psgclass,
+  Class == "Rifampin")
 
 tax_table(beta)
 
-fluoro %>% plot_composition(average_by = "Farm", group_by = "Conventional.Organic") +
-  # scale_y_continuous(labels = percent) +
+beta %>% plot_composition(average_by = "Farm", group_by = "Conventional.Organic") +
+   #scale_y_continuous(limits = c(0, 1)) +
   #theme(legend.position = "none") +
   scale_fill_viridis(option = "mako", discrete = TRUE)
 
