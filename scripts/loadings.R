@@ -2,7 +2,7 @@
 # May 9, 2023 - SAB
 # https://joey711.github.io/phyloseq/plot_ordination-examples.html 
 
-ps <- readRDS("data/full-run/decontam-ps.RDS")
+ps <- readRDS("data/full-run/sig-decontam-ps.RDS")
 
 psrel <- microbiome::transform(ps, "compositional")
 library(stats)

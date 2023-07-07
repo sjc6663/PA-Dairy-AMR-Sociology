@@ -15,10 +15,12 @@ library(microshades)
 library(microbiome)
 
 # read in phyloseq object
-ps <- readRDS("data/full-run/decontam-ps.RDS")
+ps <- readRDS("data/full-run/sig-decontam-ps.RDS")
+ps2 <- readRDS("data/full-run/decontam-ps.RDS")
 
 # transform to relative abundance
 psrel <- microbiome::transform(ps, "compositional")
+psrel2 <- microbiome::transform(ps2, "compositional")
 
 meltdf <- psmelt(ps)
 meltdf2 <- psmelt(psrel)
@@ -35,7 +37,7 @@ write.csv(meltdf2, file = "tables/melted-phyloseq-relabund.csv")
 #plot 
 
 # Male Female - Cows and Calves ----
-C <- ggplot(out2, aes(x=Broadclass, fill = Group)) + 
+C <- ggplot(out3, aes(x=sig, fill = Group)) + 
   geom_bar()+
   theme_bw()+
   scale_fill_manual(values = color_palette) +
@@ -53,7 +55,7 @@ C <- ggplot(out2, aes(x=Broadclass, fill = Group)) +
         strip.text.x = element_text(size = 12, color = "black",face = "bold")
   ) +
   #guides(fill="none")+
-  #scale_y_continuous(expand = c(0,0.1), limits = c(0,7500))+
+  scale_y_continuous(expand = c(0,0.1), limits = c(0,40000))+
   coord_flip()
 
 ggsave(filename = "plots/full-run/MF-calves-cows.pdf", dpi = 600)
@@ -228,16 +230,24 @@ ggsave(filename = "plots/full-run/soc-barplots-2.pdf", dpi = 600, width = 18, he
 
 ### Relative Abundance by Percent (Normalized Data) ----
 library(microbiome)
+library(dplyr)
 
-psclass <- aggregate_taxa(psrel, level = "Class")
+psclass <- aggregate_taxa(psrel, level = "sig")
+psbclass <- aggregate_taxa(psrel2, level = "Broadclass")
+
+psrel@tax_table@sig[psrel@tax_table@sig == "TRUE"] <- "sig"
+tax_table(psrel)$sig[tax_table(psrel)$sig == "FALSE"] <- "ns"
+
+
+pssig <- tax_glom(psrel, taxrank = "sig")
 
 # fix taxa for aesthetics
 # find and substitute
 taxa_names(psclass) <- gsub(taxa_names(psclass), pattern = "_", replacement = " ") 
 
-gender <- psbclass %>% plot_composition(group_by = "Male.Female") +
+gender <- psclass %>% plot_composition(group_by = "Male.Female") +
   # scale_y_continuous(labels = percent) +
-  # theme(legend.position = "none") +
+ # theme(legend.position = "none") +
   scale_fill_viridis(option = "mako", discrete = TRUE) + 
   ggtitle("A")
 
@@ -495,3 +505,16 @@ beta %>% plot_composition(average_by = "Farm", group_by = "Conventional.Organic"
   scale_fill_viridis(option = "mako", discrete = TRUE)
 
 test <- mutate_tax_table(psmclass, dplyr::mutate(beta = if_else(str_detect(Class, "betalactams"), true = "Yes", false = "No")))
+
+# clinically significant
+
+psg <- aggregate_taxa(psrel, level = "sig", verbose = TRUE)
+
+tax_table(ps) <- tax_table(ps)[,2:5]
+
+
+psmclass %>% plot_composition(average_by = "Male.Female") +
+  # scale_y_continuous(labels = percent) +
+  theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE)
+

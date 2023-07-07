@@ -9,9 +9,10 @@ library(ALDEx2)
 library(microViz)
 library(ggpubr)
 library(ggrepel)
+library(tibble)
 
 # load phyloseq of counts
-ps <- readRDS("data/full-run/decontam-ps.RDS")
+ps <- readRDS("data/full-run/sig-decontam-ps.RDS")
 
 # color scheme: Viridis mako / microshades micro_cvd_blue
 color_palette <- c("#BCE1FF", "#7DCCFF", "#56B4E9", "#098BD9", "#4292C6")
@@ -218,3 +219,55 @@ ggplot(data=x4, aes(x=Broadclass, y=(kw.ep), col=Broadclass, label=Gene)) +
   geom_hline(yintercept=0, col="black")
 
 ggsave(filename = "plots/aldex2-cow-calf.pdf", dpi = 600)
+
+
+
+## clinically significant genes ----
+
+# tax glom to status and then run aldex normally
+# aggregate at status level for counts
+ps2 <- ps %>%
+  tax_glom("sig")
+
+ps3 <- ps2 %>% 
+  subset_samples(
+    Male.Female == "Male"
+  )
+
+# run AlDEx2 function
+aldex2_da_G <- ALDEx2::aldex(data.frame(phyloseq::otu_table(ps)), phyloseq::sample_data(ps)$Male.Female, taxa_rank = "all", norm = "CLR", method = "t.test", p_adjust = "BH", pvalue_cutoff = 0.05, mc_samples = 128, denom = "iqlr")
+
+# look to see if anything is significant (this is for nonparametric, parametric use we.eBH)
+gsig_aldex2 <- aldex2_da_G %>%
+  filter(wi.eBH < 0.05)
+
+# setup tax table to be able to merge
+taxa_info <- data.frame(tax_table(ps2))
+taxa_info <- taxa_info %>% rownames_to_column(var = "Gene_")
+
+# look at plot to see if positive/negative effect size corresponds to which treatment level
+ALDEx2::aldex.plot(aldex2_da_G, type="MW", test="wilcox", called.cex = 1, cutoff = 0.05)
+
+# make a table of significant corrected p-values
+gsig_aldex2 <- aldex2_da_G %>%
+  rownames_to_column(var = "Gene_") %>%
+  filter(wi.eBH < 0.05) %>%
+  arrange(effect, wi.eBH) %>%
+  dplyr::select(Gene_, diff.btw, diff.win, effect, wi.ep, wi.eBH)
+
+# add in previously formed taxa information to complete the table
+gsig_aldex2 <- left_join(gsig_aldex2, taxa_info)
+gsig_aldex2
+write.csv(gsig_aldex2, file = "tables/aldex-cow-calf.csv")
+
+ggplot(data=gsig_aldex2, aes(x=sig, y=(effect), col=sig, label=Gene)) +
+  geom_point() + 
+  geom_jitter() +
+  theme_minimal() +
+  geom_text_repel() +
+  scale_color_manual(values = color_palette) +
+  #geom_vline(xintercept=c(-0.6, 0.6), col="red") +
+  geom_hline(yintercept=0, col="black") +
+  theme(legend.position = "none")
+
+ggsave(filename = "plots/full-run/aldex2-cow-calf.pdf", dpi = 600)
