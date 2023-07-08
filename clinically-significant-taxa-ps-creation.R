@@ -8,11 +8,11 @@ library(microViz)
 library(ALDEx2)
 library(dplyr)
 
-siggene <- read.csv("20230616 Clinically Important Antimicrobials Associate Genes.csv")
+siggene <- read.csv("CIA_genes.csv")
 
 siggene
 
-genes <- siggene$Gene
+genes <- siggene$SNPConfirmation
 
 gene <- as.data.frame(genes)
 
@@ -22,9 +22,6 @@ tax <- as.data.frame(ps@tax_table)
 
 tax <- tax %>% 
   select(Gene)
-
-yes = "sig"
-no = "ns"
 
 colnames(gene) <- c("Gene")
 
