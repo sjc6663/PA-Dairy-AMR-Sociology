@@ -2,7 +2,7 @@
 # SAB 4-4-2023
 
 # color scheme: Viridis mako / microshades micro_cvd_blue
-color_palette <- c("#BCE1FF", "#7DCCFF", "#56B4E9", "#098BD9", "#4292C6")
+color_palette <- c("#0070FF", "#D75CE0", "#FF5EAA", "#FF8C76", "#FFC55A", "#F9F871")
 
 # load packages
 library(phyloseq)
@@ -16,11 +16,11 @@ library(microbiome)
 
 # read in phyloseq object
 ps <- readRDS("data/full-run/sig-decontam-ps.RDS")
-ps2 <- readRDS("data/full-run/decontam-ps.RDS")
+#ps2 <- readRDS("data/full-run/decontam-ps.RDS")
 
 # transform to relative abundance
 psrel <- microbiome::transform(ps, "compositional")
-psrel2 <- microbiome::transform(ps2, "compositional")
+#psrel2 <- microbiome::transform(ps2, "compositional")
 
 meltdf <- psmelt(ps)
 meltdf2 <- psmelt(psrel)
@@ -232,7 +232,7 @@ ggsave(filename = "plots/full-run/soc-barplots-2.pdf", dpi = 600, width = 18, he
 library(microbiome)
 library(dplyr)
 
-psclass <- aggregate_taxa(psrel, level = "sig")
+pssig <- aggregate_taxa(psrel, level = "sig")
 psbclass <- aggregate_taxa(psrel2, level = "Broadclass")
 
 psrel@tax_table@sig[psrel@tax_table@sig == "TRUE"] <- "sig"
@@ -245,10 +245,10 @@ pssig <- tax_glom(psrel, taxrank = "sig")
 # find and substitute
 taxa_names(psclass) <- gsub(taxa_names(psclass), pattern = "_", replacement = " ") 
 
-gender <- psclass %>% plot_composition(group_by = "Male.Female") +
-  # scale_y_continuous(labels = percent) +
+gender <- pssig %>% plot_composition(group_by = "Farm", x.label = "Male.Female") +
+  # scale__continuous(labels = percent) +
  # theme(legend.position = "none") +
-  scale_fill_viridis(option = "mako", discrete = TRUE) + 
+  scale_fill_manual(values = c("#0070FF", "#FF8C76")) + 
   ggtitle("A")
 
 ggsave(filename = "plots/full-run/relabund-averaged.pdf", dpi = 600, width = 24, height = 12)

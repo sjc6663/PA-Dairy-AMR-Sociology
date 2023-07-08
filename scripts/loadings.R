@@ -4,11 +4,20 @@
 
 ps <- readRDS("data/full-run/sig-decontam-ps.RDS")
 
-psrel <- microbiome::transform(ps, "compositional")
+met <- readxl::read_xlsx("/Users/stephanieclouser/OneDrive - The Pennsylvania State University/Shared-Projects/Ransom-AMR/3.Sample-Collection/Ransom-AMR-Metadata.xlsx",
+                                sheet = "meta-numbers")
+
+samp <- phyloseq::sample_data(met)
+rownames(samp) <- met$`Sample-ID`
+
+sample_data(ps) <- phyloseq(sample_data(samp))
+
 library(stats)
 library(phyloseq)
 library(microViz)
 library(ggplot2)
+
+psrel <- microbiome::transform(ps, "compositional")
 
 ##  PCA plot - Male Female ----
 psrel %>% 
@@ -127,11 +136,11 @@ is.numeric(sample_data(psrel)$Cultural.Language.Barriers)
 # alternatively, constrain variation on weight and female
   constrained_aitchison_rda <- psrel %>%
     tax_transform("clr") %>%
-    ord_calc(constraints = c("Male.Female", "Group", "Conventional.Organic", "Herd.Size", "Formal.Team.Meetings.Frequency", "Cultural.Language.Barriers"), 
+    ord_calc(constraints = c("Male.Female", "Group", "Herd.Size", "Formal.Team.Meetings.Frequency", "Cultural.Language.Barriers", "Non.Family.Milkers"), 
              method = "RDA") # constraints --> RDA
   
   constrained_aitchison_rda %>%
-    ord_plot(colour = "Male.Female", constraint_vec_length = 2)
+    ord_plot(colour = "Group", constraint_vec_length = 2)
   
 ggsave(filename = "plots/biplot.pdf", dpi = 600, width = 40, height = 40)
 

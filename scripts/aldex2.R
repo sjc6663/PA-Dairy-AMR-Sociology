@@ -15,7 +15,7 @@ library(tibble)
 ps <- readRDS("data/full-run/sig-decontam-ps.RDS")
 
 # color scheme: Viridis mako / microshades micro_cvd_blue
-color_palette <- c("#BCE1FF", "#7DCCFF", "#56B4E9", "#098BD9", "#4292C6")
+color_palette <- c("#0070FF", "#D75CE0", "#FF5EAA", "#FF8C76", "#FFC55A", "#F9F871")
 
 ## Age Group ----
 # run AlDEx2 function
