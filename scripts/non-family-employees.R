@@ -7,12 +7,12 @@ sample_data(psrel)$Non.Family.Milkers
 is.character(sample_data(psrel)$Non.Family.Milkers)
 as.character(sample_data(psrel)$Non.Family.Milkers)
 
-psrel <- psrel %>% 
+ps <- ps %>% 
   ps_mutate(
     employees = if_else(str_detect(Non.Family.Milkers, "0"), true = "No", false = "Yes")
   ) 
 
-sample_data(psrel)
+sample_data(ps)
 
 meltdf <- psmelt(psrel)
 

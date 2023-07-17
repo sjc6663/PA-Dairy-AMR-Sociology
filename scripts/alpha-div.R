@@ -3,7 +3,7 @@
 
 # setup ----
 # color scheme: Viridis mako / microshades micro_cvd_blue
-color_palette <- c("#BCE1FF", "#7DCCFF", "#56B4E9", "#098BD9", "#4292C6")
+# color_palette <- c("#0070FF", "#D75CE0", "#FF5EAA", "#FF8C76", "#FFC55A", "#F9F871")
 
 # load packages
 library(phyloseq)
@@ -114,7 +114,7 @@ ggsave(plot = AG, filename = "plots/full-run/cows-vs-calves.pdf", dpi = 600)
 
 MFAG <- plot_richness(ps, x="Male.Female", measures=c("Shannon"), title = "Male vs. Female by Age Group", color = "Group") + 
   geom_boxplot() + 
-  scale_color_manual(values = color_palette) +
+  scale_color_manual(values = color_palette[1:5]) +
   theme_classic()
   #theme(legend.position = "none")
 MFAG
@@ -238,7 +238,7 @@ ggsave(filename = "plots/full-run/cow-calf-stats.pdf", dpi = 600)
 # Male / Female ------------------------------------
   
 v_MF <- ggviolin(ps.meta, x = "Male.Female", y = "Shannon$Shannon",
-                      add = "boxplot", fill = "Male.Female", palette = color_palette, title = "A", ylab = "Shannon's Diversity Index", xlab = "Primary Farm Operator Gender") +
+                      add = "boxplot", fill = "Male.Female", palette = c("#0070FF", "#FFC55A"), title = "A", ylab = "Shannon's Diversity Index", xlab = "Primary Farm Operator Gender") +
   theme(legend.position = "none")
 v_MF
 
@@ -260,9 +260,11 @@ ggsave(filename = "plots/full-run/male-female-stats.pdf", dpi = 600)
 # Male / Female Age Groups (PROBLEMS WITH THIS PLOT) ------------------------------------
 
 v_MFAG <- ggviolin(ps.meta, x = "Male.Female", y = "Shannon$Shannon",
-                 add = "boxplot", fill = "Group", palette = color_palette, title = "B", ylab = "Shannon's Diversity Index", xlab = "Primary Farm Operator Gender")
+                 add = "boxplot", fill = "Group", palette = c("#0070FF", "#FFC55A"), title = "B", ylab = "Shannon's Diversity Index", xlab = "Primary Farm Operator Gender")
  # theme(legend.position = "none")
 v_MFAG
+
+ggsave(v_MFAG, filename = "plots/presentation/age-gender.pdf", dpi = 600)
 
 # create a list of pairwise comaprisons
 MFAG <- unique(adiv$AgeGroup) # get the variables
@@ -323,6 +325,20 @@ v_CLB
 
 ggsave(filename = "plots/full-run/language-barriers-stats.pdf", dpi = 600)
 
+# non-family employees --------------------
+ps <- ps %>% 
+  ps_mutate(
+    employees = if_else(str_detect(Non.Family.Milkers, "0"), true = "No", false = "Yes")
+  ) 
+
+sample_data(ps)
+
+v_emp <- ggviolin(ps.meta, x = "employees", y = "Shannon$Shannon",
+                   add = "boxplot", fill = "Male.Female", palette = c("#0070FF", "#FFC55A"), title = "B", ylab = "Shannon's Diversity Index", xlab = "Non-Family Employees")  
+  #theme(legend.position = "none")
+v_emp
+
+ggsave(v_emp, filename = "plots/presentation/nonfamemp.pdf", dpi = 600)
 
 ## COMBINED PLOTS ----
 # Combined Plots Showing CO, AG, HS 

@@ -2,7 +2,7 @@
 # SAB 4-4-2023
 
 # color scheme: Viridis mako / microshades micro_cvd_blue
-color_palette <- c("#0070FF", "#D75CE0", "#FF5EAA", "#FF8C76", "#FFC55A", "#F9F871")
+color_palette <- c("#0070FF", "#D75CE0", "#FFC55A", "#FF8C76", "#F9F871", "#FF5EAA")
 
 # load packages
 library(phyloseq)
@@ -15,7 +15,7 @@ library(microshades)
 library(microbiome)
 
 # read in phyloseq object
-ps <- readRDS("data/full-run/sig-decontam-ps.RDS")
+ps <- readRDS("data/full-run/decontam-ps.RDS")
 #ps2 <- readRDS("data/full-run/decontam-ps.RDS")
 
 # transform to relative abundance
@@ -114,10 +114,10 @@ ggsave(filename = "plots/full-run/calves-cows.pdf", dpi = 600)
 
 # Herd Size ----
 
-out2$Herd.Size <- factor(out2$Herd.Size,
+out3$Herd.Size <- factor(out3$Herd.Size,
        levels = c("0-50", "50-100", "100-150", "150-200", "200+"))
 
-HS <- ggplot(out2, aes(x=Broadclass, fill = Herd.Size)) + 
+HS <- ggplot(out3, aes(x=Broadclass, fill = Herd.Size)) + 
   geom_bar()+
   theme_bw()+
   scale_fill_manual(values = color_palette) +
@@ -131,7 +131,7 @@ HS <- ggplot(out2, aes(x=Broadclass, fill = Herd.Size)) +
         legend.text = element_text(size = 12),
         legend.title = element_text(size = 15, face = "bold", hjust = 0),
         legend.position = "right",
-        strip.background = element_rect(fill = color_palette[2]),
+        strip.background = element_rect(fill = color_palette[6]),
         strip.text.x = element_text(size = 12, color = "black",face = "bold")
   ) +
   #guides(fill="none")+
@@ -245,7 +245,7 @@ pssig <- tax_glom(psrel, taxrank = "sig")
 # find and substitute
 taxa_names(psclass) <- gsub(taxa_names(psclass), pattern = "_", replacement = " ") 
 
-gender <- pssig %>% plot_composition(group_by = "Farm", x.label = "Male.Female") +
+gender <- pssig %>% plot_composition(group_by = "Farm", x.label = "Conventional.Organic") +
   # scale__continuous(labels = percent) +
  # theme(legend.position = "none") +
   scale_fill_manual(values = c("#0070FF", "#FF8C76")) + 
@@ -356,10 +356,10 @@ psbclass <- aggregate_taxa(psrel, level = "Broadclass")
 # find and substitute
 taxa_names(psbclass) <- gsub(taxa_names(psbclass), pattern = "_", replacement = " ") 
 
-gender2 <- psbclass %>% plot_composition(average_by = "Male.Female") +
+psbclass %>% plot_composition(average_by = "Male.Female") +
   # scale_y_continuous(labels = percent) +
   # theme(legend.position = "none") +
-  scale_fill_manual(values = color_palette) +
+  scale_fill_viridis(option = "C", discrete = TRUE) +
   ggtitle("D")
 
 ggsave(filename = "plots/full-run/relabund-averaged-bclass-gender.pdf", dpi = 600, width = 12, height = 14)
