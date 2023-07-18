@@ -3,7 +3,10 @@
 
 # setup ----
 # color scheme: Viridis mako / microshades micro_cvd_blue
-# color_palette <- c("#0070FF", "#D75CE0", "#FF5EAA", "#FF8C76", "#FFC55A", "#F9F871")
+
+color_palette <- c("#0070FF", "#D75CE0", "#FFC55A", "#FF8C76", "#F9F871", "#FF5EAA")
+
+set.seed(81299)
 
 # load packages
 library(phyloseq)
@@ -42,27 +45,27 @@ write.csv(adiv, "tables/full-run_alpha-div.csv", row.names = FALSE)
 # Male Female 
 varMF <- var.test(Shannon ~ MF, data = adiv, 
          alternative = "two.sided")
-varMF # p = 0.06, not sig but close
+varMF # p = 0.28, not sig
 
 varAG <- var.test(Shannon ~ AgeGroup, data = adiv,
                   alternative = "two.sided")
-varAG # p = 3.794e-07, SIGNIFICANT DIFFERENCE
+varAG # p = 0.10, not sig
 
 varOC <- var.test(Shannon ~ OrgCon, data = adiv,
                   alternative = "two.sided")
-varOC # p = 0.175, not sig
+varOC # p = 0.19, not sig
 
 varTM <- leveneTest(Shannon ~ TeamMeetings, data = adiv) # have to do levene's test because its more than 2 groups
-varTM # p = 0.70, not sig
+varTM # p = 0.51, not sig
 
 varLB <- var.test(Shannon ~ LangBarrier, data = adiv,
                   alternative = "two.sided")
-varLB # p = not sig, but close
+varLB # p = 0.60, not sig
 
 varHS <- leveneTest(Shannon ~ HerdSize, data = adiv)
 varHS # p = 0.16, not sig
 
-# because we have groups with equal variances and groups with not equal variances, we are going to do Welch's t-test (ANOVA) for all comparisons to keep uniform statistical analysis
+# none of our groups have significant variance differences, so we can run standard t-tests.  
 
 # Welch's t-test ----
 # https://www.statology.org/welchs-anova-in-r/ 
@@ -167,7 +170,7 @@ ps.meta$'' <- alpha(ps, index = 'shannon')
 
 # Formal Team Meetings ------------------------------------
 
-v_FTM <- ggviolin(ps.meta, x = "Formal.Team.Meetings.Frequency", y = "Shannon$Shannon",
+ggviolin(ps.meta, x = "Formal.Team.Meetings.Frequency", y = "Shannon$Shannon",
                  add = "boxplot", fill = "Formal.Team.Meetings.Frequency", palette = color_palette, title = "C", ylab = "Shannon's Diversity Index", xlab = "Formal Team Meeting Frequency") +
   scale_x_discrete(limits = c("Never", "1 or 2 times/year", "Quarterly", "Once a month", "At least twice a month")) 
 theme(legend.position = "none")
@@ -179,7 +182,7 @@ FTMF <- unique(adiv$TeamMeetings) # get the variables
 
 FTMF_pair <- combn(seq_along(FTMF), 2, simplify = FALSE, FUN = function(i)FTMF[i])
 
-p1 <- ggviolin(ps.meta, x = "Formal.Team.Meetings.Frequency", y = "Shannon$Shannon",
+ggviolin(ps.meta, x = "Formal.Team.Meetings.Frequency", y = "Shannon$Shannon",
                add = "boxplot", fill = "Formal.Team.Meetings.Frequency", palette = color_palette) +
   scale_x_discrete(limits = c("Never", "1 or 2 times/year", "Quarterly", "Once a month", "At least twice a month")) +
   theme(legend.position = "none") + 
@@ -194,9 +197,11 @@ ggsave(filename = "plots/full-run/violin-plot-team-meetings-stats.pdf", dpi = 60
 
 # Conventional / Organic ------------------------------------
 
-v_CO <- ggviolin(ps.meta, x = "Conventional.Organic", y = "Shannon$Shannon",
+ggviolin(ps.meta, x = "Conventional.Organic", y = "Shannon$Shannon",
                add = "boxplot", fill = "Conventional.Organic", palette = color_palette, title = "A", ylab = "Shannon's Diversity Index", xlab = "Farm Type") +
   theme(legend.position = "none")
+
+
 v_CO
 
 # create a list of pairwise comaprisons
@@ -215,7 +220,7 @@ ggsave(filename = "plots/full-run/conventional-organic-stats.pdf", dpi = 600)
 
 # Age Group ------------------------------------
   
-v_group <- ggviolin(ps.meta, x = "Group", y = "Shannon$Shannon",
+ggviolin(ps.meta, x = "Group", y = "Shannon$Shannon",
                  add = "boxplot", fill = "Group", palette = color_palette, title = "B", ylab = "Shannon's Diversity Index", xlab = "Age Group") +
   theme(legend.position = "none")
 v_group
@@ -354,3 +359,11 @@ ggsave(filename = "plots/full-run/combined-soc-details.pdf", dpi = 600, width = 
 
 # save work ----
 save.image("data/alpha-div.RData")
+
+
+# dotplot
+
+ps.meta$Shannon <- as.factor(ps.meta$Shannon)
+
+ggplot(ps.meta, aes(x=Batch, y=Conventional.Organic, fill=Run)) +
+  geom_dotplot(binaxis='x', stackdir='center')

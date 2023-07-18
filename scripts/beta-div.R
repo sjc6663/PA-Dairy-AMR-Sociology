@@ -29,15 +29,21 @@ vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Conventional.Organic) #
 vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Formal.Team.Meetings.Frequency) # p = 0.96, not sig
 vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Cultural.Language.Barriers) # p = 0.98, not sig
 
+vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Run) # p = 0.332, not sig
+
+sample_data(psrel)$Run <- as.character(sample_data(psrel)$Run)
+
+sample_data(psrel)$Cultural.Language.Barriers[sample_data(psrel)$Cultural.Language.Barriers == "Yes"] <- 1
+sample_data(psrel)$Cultural.Language.Barriers[sample_data(psrel)$Cultural.Language.Barriers == "No"] <- 2
 
 ##  PCA plot - Male Female ----
-A_soc <- psrel %>% 
+psrel %>% 
   # when no distance matrix or constraints are supplied, PCA is the default/auto ordination method
   tax_transform(trans = "clr") %>%
   ord_calc(method = "PCA") %>% 
-  ord_plot(color = "Male.Female") +
-  scale_color_manual(values = colors) +
-  stat_ellipse(aes(group = Male.Female, color = Male.Female)) + 
+  ord_plot(color = "Run", shape = "Group") +
+  scale_color_manual(values = color_palette) +
+  stat_ellipse(aes(group = Run, color = Run)) + 
   theme_classic() +
   ggtitle("A") + 
   labs(caption = "R2 = 0.016, F(1,70) = 1.07, P = 0.30")

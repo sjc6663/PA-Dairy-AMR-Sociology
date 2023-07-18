@@ -15,7 +15,7 @@ library(ggplot2)
 library(readxl)
 
 #my filtering mess that yall dont need to see---- 
-countsDF <- read.delim("tables/countmatrix-cleanedall.txt", sep = "\t") 
+countsDF <- read.delim("data/ransom/ransom-countmatrix-cleanedall.txt", sep = "\t") 
 met <- read.delim("batchinfo/meta/meta-both.txt")
 genes <- read.delim("tables/geneinfo-all.txt")
 ​
@@ -55,9 +55,9 @@ test <- test[, -grep(paste(dupelist[8]), colnames(test))]
 #write.table(test, "tables/countmatrix-duperm.txt", sep = "\t")
 ​
 #read in necessary files: count matrix, gene info, metadata---- 
-countsDF <- read.delim("/Users/stephanieclouser/OneDrive - The Pennsylvania State University/Shared-Projects/Ransom-AMR/7.Data-Analysis/SK_Prelim/countmatrix-cleanedall.txt", sep = "\t") 
+countsDF <- read.delim("data/ransom/ransom-countmatrix-cleanedall.txt", sep = "\t") 
 met <- read_excel("/Users/stephanieclouser/OneDrive - The Pennsylvania State University/Shared-Projects/Ransom-AMR/3.Sample-Collection/Ransom-AMR-Metadata.xlsx")
-genes <- read.delim("/Users/stephanieclouser/OneDrive - The Pennsylvania State University/Shared-Projects/Ransom-AMR/7.Data-Analysis/SK_Prelim/geneinfo-all.txt", sep = "\t") %>%
+genes <- read.delim("data/ransom/ransom-geneinfo-all.txt", sep = "\t") %>%
   select(-c(MEG_ID)) %>%
   unique()
 
