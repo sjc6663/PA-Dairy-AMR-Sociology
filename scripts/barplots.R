@@ -233,7 +233,7 @@ library(microbiome)
 library(dplyr)
 
 pssig <- aggregate_taxa(psrel, level = "sig")
-psbclass <- aggregate_taxa(psrel2, level = "Broadclass")
+psbclass <- aggregate_taxa(psrel, level = "Broadclass")
 
 psrel@tax_table@sig[psrel@tax_table@sig == "TRUE"] <- "sig"
 tax_table(psrel)$sig[tax_table(psrel)$sig == "FALSE"] <- "ns"
@@ -245,13 +245,13 @@ pssig <- tax_glom(psrel, taxrank = "sig")
 # find and substitute
 taxa_names(psclass) <- gsub(taxa_names(psclass), pattern = "_", replacement = " ") 
 
-gender <- pssig %>% plot_composition(group_by = "Farm", x.label = "Conventional.Organic") +
+psbclass %>% plot_composition(average_by = "Group", sample.sort = "Group", x.label = "Group") +
   # scale__continuous(labels = percent) +
  # theme(legend.position = "none") +
-  scale_fill_manual(values = c("#0070FF", "#FF8C76")) + 
+  scale_fill_viridis(option = "mako", discrete = TRUE)  
   ggtitle("A")
 
-ggsave(filename = "plots/full-run/relabund-averaged.pdf", dpi = 600, width = 24, height = 12)
+ggsave(filename = "plots/presentation/relabund-avg-group.pdf", dpi = 600, width = 16, height = 14)
 
 age <- psbclass %>% plot_composition(group_by = "Group") +
   # scale_y_continuous(labels = percent) +
@@ -518,3 +518,56 @@ psmclass %>% plot_composition(average_by = "Male.Female") +
   theme(legend.position = "none") +
   scale_fill_viridis(option = "mako", discrete = TRUE)
 
+# Herd Size, Conventional Only -----------
+
+hs <- psrel %>% 
+  subset_samples(
+    Conventional.Organic == "Conventional"
+  )
+
+sample_data(hs)
+
+hs <- hs %>% 
+  ps_mutate(
+    herd = if_else(str_detect(Herd.Size,"150-200"), true = "> 150", false = "< 150"),
+  ) 
+
+hs <- hs %>% 
+  ps_mutate(herd = case_when(
+    herd == "< 150" & str_detect(Herd.Size, "200+") ~ "> 150",
+    herd == "< 150" & !str_detect(Herd.Size, "200+") ~ "< 150",
+    herd == "> 150" ~ "> 150"
+  ))
+
+sample_data(hs)$herd
+
+hsb <- aggregate_taxa(hs, level = "Broadclass")
+
+# find and substitute
+taxa_names(hsb) <- gsub(taxa_names(hsb), pattern = "_", replacement = " ") 
+
+hsb %>% plot_composition(average_by = "herd", sample.sort = "Group", x.label = "Group") +
+  # scale__continuous(labels = percent) +
+  # theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE)  
+ggtitle("A")
+
+ggsave(filename = "plots/presentation/relabund-avg-group.pdf", dpi = 600, width = 16, height = 14)
+
+
+# non-family employees -------
+
+psrel <- psrel %>% 
+  ps_mutate(
+    employees = if_else(str_detect(Non.Family.Milkers, "0"), true = "No", false = "Yes")
+  ) 
+
+psb <- aggregate_taxa(psrel, level = "Broadclass")
+
+psb %>% plot_composition(average_by = "employees", sample.sort = "Group", x.label = "Group") +
+  # scale__continuous(labels = percent) +
+  # theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE)  
+ggtitle("A")
+
+ggsave(filename = "plots/presentation/relabund-avg-nonfamilyemp.pdf", dpi = 600, width = 16, height = 14)

@@ -2,6 +2,8 @@
 # SAB 07/17/2023
 # for colors use viridis mako 
 
+color_palette <- c("#0070FF", "#D75CE0", "#FFC55A", "#FF8C76", "#F9F871", "#FF5EAA")
+
 # load packages
 library(phyloseq)
 library(microViz)
@@ -53,7 +55,7 @@ ggplot(out3, aes(x=Broadclass, fill = Group)) +
         strip.text.x = element_text(size = 12, color = "black",face = "bold")
   ) +
   #guides(fill="none")+
-  scale_y_continuous(expand = c(0,0.1), limits = c(0,25000))+
+  scale_y_continuous(expand = c(0,0.1), limits = c(0,10000))+
   coord_flip()
 
 ggsave(filename = "plots/full-run/MF-calves-cows.pdf", dpi = 600)
@@ -66,10 +68,42 @@ psbclass <- aggregate_taxa(psrel, level = "Broadclass")
 # find and substitute
 taxa_names(psbclass) <- gsub(taxa_names(psbclass), pattern = "_", replacement = " ") 
 
-psbclass %>% plot_composition(group_by = "Group", x.label = "Male.Female") +
+psbclass %>% plot_composition(group_by = "Farm", x.label = "Group") +
   # scale_y_continuous(labels = percent) +
   # theme(legend.position = "none") +
   scale_fill_viridis(option = "G", discrete = TRUE) +
   ggtitle("")
 
-ggsave(filename = "plots/presentation/relabund-averaged-bclass-age-gender.pdf", dpi = 600, width = 12, height = 14)
+ggsave(filename = "plots/presentation/relabund-sig-bclass-farm-age.pdf", dpi = 600, width = 14, height = 10)
+
+psbclass %>% plot_composition(group_by = "Male.Female", sample.sort = "Group", x.label = "Group") +
+  # scale_y_continuous(labels = percent) +
+  # theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  ggtitle("")
+
+ggsave(filename = "plots/presentation/relabund-sig-bclass-gender-age.pdf", dpi = 600, width = 14, height = 10)
+
+psbclass %>% plot_composition(average_by = "Male.Female", sample.sort = "Group", x.label = "Group") +
+  # scale_y_continuous(labels = percent) +
+  # theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  ggtitle("")
+
+ggsave(filename = "plots/presentation/relabund-sig-avg-gender-age.pdf", dpi = 600, width = 14, height = 10)
+
+psbclass %>% plot_composition(average_by = "Farm", sample.sort = "Group", x.label = "Group") +
+  # scale_y_continuous(labels = percent) +
+  # theme(legend.position = "none") +
+  scale_fill_viridis(option = "mako", discrete = TRUE) +
+  ggtitle("")
+
+ggsave(filename = "plots/presentation/relabund-sig-avg-farm-age.pdf", dpi = 600, width = 14, height = 10)
+
+psbclass %>% plot_composition(group_by = "Housing.Style", sample.sort = "Group", x.label = "Group") +
+  # scale_y_continuous(labels = percent) +
+  # theme(legend.position = "none") +
+  scale_fill_viridis(option = "G", discrete = TRUE) +
+  ggtitle("")
+
+ggsave(filename = "plots/presentation/relabund-sig-bclass-gender-age.pdf", dpi = 600, width = 14, height = 10)
