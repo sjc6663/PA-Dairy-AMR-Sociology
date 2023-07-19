@@ -1,5 +1,13 @@
 ## BETA DIVERSITY
 
+library(phyloseq)
+library(vegan)
+library(microViz)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(patchwork)
+
 set.seed(81299)
 
 ps <- readRDS("data/full-run/decontam-ps.RDS")
@@ -7,7 +15,7 @@ ps <- readRDS("data/full-run/decontam-ps.RDS")
 ps2 <- rarefy_even_depth(ps)
 
 color_palette <- c("#8ad9b1", "#40b7ad", "#348fa7", "#37659e", "#423d7b")
-small_color <- c("#40b7ad", "#423d7b")
+small_color <- c("#348fa7", "#423d7b")
 
 # transform to relative abundance
 psrel <- microbiome::transform(ps2, "compositional")
@@ -40,17 +48,17 @@ vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Run) # p = 0.008***, SI
 
 sample_data(psrel)$Run <- as.character(sample_data(psrel)$Run)
 
-psrel %>% 
+A <- psrel %>% 
   # when no distance matrix or constraints are supplied, PCA is the default/auto ordination method
   tax_transform(trans = "clr") %>%
   ord_calc(method = "PCA") %>% 
-  ord_plot(color = "Conventional.Organic", shape = "Group") +
+  ord_plot(color = "Male.Female") +
   scale_color_manual(values = small_color) +
-  stat_ellipse(aes(group = Conventional.Organic, color = Conventional.Organic)) + 
+  stat_ellipse(aes(group = Male.Female, color = Male.Female)) + 
   theme_classic() +
   ggtitle("A") + 
-  labs(caption = "R2 = 0.016, F(1,70) = 1.07, P = 0.30")
-A_soc
+  labs(caption = "R2 = 0.018, F(1,70) = 1.30, P = 0.032*")
+A
 
 ggsave(filename = "plots/full-run/PCA-male-female.pdf", dpi = 600)
 
@@ -114,37 +122,40 @@ ggsave(filename = "plots/full-run/PCA-soc-plots.pdf", dpi = 600, height = 10, wi
 
 
 ##  PCA plot - Farm Type  ----
-A_farm <- psrel %>% 
+B <- psrel %>% 
   # when no distance matrix or constraints are supplied, PCA is the default/auto ordination method
   tax_transform(trans = "clr") %>%
   ord_calc(method = "PCA") %>% 
   ord_plot(color = "Conventional.Organic") +
-  scale_color_manual(values = colors) +
+  scale_color_manual(values = small_color) +
   stat_ellipse(aes(group = Conventional.Organic, color = Conventional.Organic)) + 
   theme_classic() +
-  ggtitle("A") + 
-  labs(caption = "R2 = 0.017, F(1, 70) = 1.20, P = 0.17") 
+  ggtitle("B") + 
+  labs(caption = "R2 = 0.018, F(1, 70) = 1.31, P = 0.026*") 
 
-A_farm
+B
 
 ggsave(filename = "plots/full-run/PCA-farm-type.pdf", dpi = 600)
 
 ##  PCA plot - Age Group  ----
-B_farm <- psrel %>% 
+C <- psrel %>% 
   # when no distance matrix or constraints are supplied, PCA is the default/auto ordination method
   tax_transform(trans = "clr") %>%
   ord_calc(method = "PCA") %>% 
   ord_plot(color = "Group") +
-  scale_color_manual(values = colors) +
+  scale_color_manual(values = small_color) +
   stat_ellipse(aes(group = Group, color = Group)) + 
   theme_classic() +
-  ggtitle("B") + 
-  labs(caption = "R2 = 0.068, F(1, 70) = 5.08, P = 0.001***, ") 
+  ggtitle("C") + 
+  labs(caption = "R2 = 0.035, F(1, 70) = 2.53, P = 0.001***") 
 
-B_farm
+C
 
 ggsave(filename = "plots/full-run/PCA-age-group.pdf", dpi = 600)
 
+(A|B)/C
+
+ggsave(filename = "plots/presentation/PCA-beta-all.pdf", dpi = 600, width = 12, height = 10)
 ##  PCA plot - Herd Size ----
 
 sample_data(psrel)$Herd.Size <- factor(sample_data(psrel)$Herd.Size,
