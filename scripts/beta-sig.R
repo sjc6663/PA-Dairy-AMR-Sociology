@@ -1,7 +1,8 @@
-# Beta diveristy of clinically significant genes
+# Beta diversity of clinically significant genes
 # SAB 07/17/2023
 
-color_palette <- scale_fill_viridis(option = "G")
+color_palette <- c("#367aa1", "#348fa7", "#40b7ad", "#8ad9b1", "#def4e5")
+small_color <- c("#367aa1", "#def4e5")
 
 set.seed(81299)
 

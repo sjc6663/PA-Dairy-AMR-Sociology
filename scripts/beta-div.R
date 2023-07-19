@@ -6,7 +6,8 @@ ps <- readRDS("data/full-run/decontam-ps.RDS")
 
 ps2 <- rarefy_even_depth(ps)
 
-colors <- c("#BCF5F9", "#89C5FD", "#3A80EC", "#0229BF", "#080B6C")
+color_palette <- c("#8ad9b1", "#40b7ad", "#348fa7", "#37659e", "#423d7b")
+small_color <- c("#40b7ad", "#423d7b")
 
 # transform to relative abundance
 psrel <- microbiome::transform(ps2, "compositional")
@@ -22,27 +23,18 @@ transps <- psrel %>%
   tax_transform(trans = "clr") %>% 
   ps_get()
 
-OTU <- as(sample_data(transps), "matrix")
-OTU2 <- as.data.frame(OTU)
-head(OTU2)
-OTU3 <- rownames_to_column(OTU2, var = "sample.id.2")
-
-
 dist_mat <- phyloseq::distance(transps, method = "euclidean")
 
-vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Male.Female) # p = 0.013*, SIGNIFICANT
+vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Male.Female) # p = 0.009**, SIGNIFICANT
 vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Group) # p = 0.001***, SIGNIFICANT
 vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Group*phyloseq::sample_data(transps)$Male.Female) # p (Group:Male.Female) = 0.399, not sig
 vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Herd.Size) # p = 0.577, not sig
 vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Conventional.Organic) # p = 0.017*, SIGNIFICANT
 vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Formal.Team.Meetings.Frequency) # p = 0.987, not sig
 vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Cultural.Language.Barriers) # p = 0.792, not sig
-vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$employees) # p = 0.086, not sig
+vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$employees) # p = 0.095, not sig
 
 vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Run) # p = 0.008***, SIGNIFICANT
-
-sample_data(psrel)$Cultural.Language.Barriers[sample_data(psrel)$Cultural.Language.Barriers == "Yes"] <- 1
-sample_data(psrel)$Cultural.Language.Barriers[sample_data(psrel)$Cultural.Language.Barriers == "No"] <- 2
 
 ##  PCA plot - Male Female ----
 
@@ -53,7 +45,7 @@ psrel %>%
   tax_transform(trans = "clr") %>%
   ord_calc(method = "PCA") %>% 
   ord_plot(color = "Conventional.Organic", shape = "Group") +
-  scale_color_manual(values = color_palette) +
+  scale_color_manual(values = small_color) +
   stat_ellipse(aes(group = Conventional.Organic, color = Conventional.Organic)) + 
   theme_classic() +
   ggtitle("A") + 

@@ -4,7 +4,8 @@
 # setup ----
 # color scheme: Viridis mako / microshades micro_cvd_blue
 
-color_palette <- c("#0070FF", "#D75CE0", "#FFC55A", "#FF8C76", "#F9F871", "#FF5EAA")
+color_palette <- c("#8ad9b1", "#40b7ad", "#348fa7", "#37659e", "#423d7b")
+small_color <- c("#40b7ad", "#423d7b")
 
 set.seed(81299)
 
