@@ -26,17 +26,25 @@ library(patchwork)
 # read in phyloseq object
 ps <- readRDS("data/full-run/decontam-ps.RDS")
 
+ps2 <- rarefy_even_depth(ps)
+
+ps2 <- ps2 %>% 
+  ps_mutate(
+    employees = if_else(str_detect(Non.Family.Milkers, "0"), true = "No", false = "Yes")
+  ) 
+
 # create data frame ----
 # create data frame with relevant metadata for comparison
 adiv <- data.frame(
-  "Shannon" = phyloseq::estimate_richness(ps, measures = "Shannon"),
-  "MF" = phyloseq::sample_data(ps)$Male.Female,
-  "AgeGroup" = phyloseq::sample_data(ps)$Group,
-  "Size" = phyloseq::sample_data(ps)$Number.Milking.Cows,
-  "OrgCon" = phyloseq::sample_data(ps)$Conventional.Organic,
-  "TeamMeetings" = phyloseq::sample_data(ps)$Formal.Team.Meetings.Frequency,
-  "LangBarrier" = phyloseq::sample_data(ps)$Cultural.Language.Barriers,
-  "HerdSize" = phyloseq::sample_data(ps)$Herd.Size
+  "Shannon" = phyloseq::estimate_richness(ps2, measures = "Shannon"),
+  "MF" = phyloseq::sample_data(ps2)$Male.Female,
+  "AgeGroup" = phyloseq::sample_data(ps2)$Group,
+  "Size" = phyloseq::sample_data(ps2)$Number.Milking.Cows,
+  "OrgCon" = phyloseq::sample_data(ps2)$Conventional.Organic,
+  "TeamMeetings" = phyloseq::sample_data(ps2)$Formal.Team.Meetings.Frequency,
+  "LangBarrier" = phyloseq::sample_data(ps2)$Cultural.Language.Barriers,
+  "HerdSize" = phyloseq::sample_data(ps2)$Herd.Size,
+  "employees" = phyloseq::sample_data(ps2)$employees
 )
 write.csv(adiv, "tables/full-run_alpha-div.csv", row.names = FALSE)
 
@@ -45,26 +53,29 @@ write.csv(adiv, "tables/full-run_alpha-div.csv", row.names = FALSE)
 # Male Female 
 varMF <- var.test(Shannon ~ MF, data = adiv, 
          alternative = "two.sided")
-varMF # p = 0.28, not sig
+varMF # p = 0.05, not sig
 
 varAG <- var.test(Shannon ~ AgeGroup, data = adiv,
                   alternative = "two.sided")
-varAG # p = 0.10, not sig
+varAG # p = 0.003***
 
 varOC <- var.test(Shannon ~ OrgCon, data = adiv,
                   alternative = "two.sided")
-varOC # p = 0.19, not sig
+varOC # p = 0.11, not sig
 
 varTM <- leveneTest(Shannon ~ TeamMeetings, data = adiv) # have to do levene's test because its more than 2 groups
 varTM # p = 0.51, not sig
 
 varLB <- var.test(Shannon ~ LangBarrier, data = adiv,
                   alternative = "two.sided")
-varLB # p = 0.60, not sig
+varLB # p = 0.63, not sig
 
 varHS <- leveneTest(Shannon ~ HerdSize, data = adiv)
-varHS # p = 0.16, not sig
+varHS # p = 0.37, not sig
 
+varNFE <- var.test(Shannon ~ employees, data = adiv,
+                   alternative = "two.sided")
+varNFE # p = 0.78, not sig
 # none of our groups have significant variance differences, so we can run standard t-tests.  
 
 # Welch's t-test ----
@@ -72,31 +83,35 @@ varHS # p = 0.16, not sig
 
 # male female
 wtestMF <- oneway.test(Shannon ~ MF, data = adiv, var.equal = FALSE)
-wtestMF # p = 0.23, ns
+wtestMF # p = 0.0011**, SIGNIFICANT
 
 # age group
 wtestAG <- oneway.test(Shannon ~ AgeGroup, data = adiv, var.equal = FALSE)
-wtestAG # p = 3.16e-08, SIGNFICANT
+wtestAG # p = 0.00039***, SIGNFICANT
 
 # age group as a subgroup of male/female
 wtestMFAG <- oneway.test(Shannon ~ AgeGroup*MF, data = adiv, var.equal = FALSE)
-wtestMFAG # p = 1.25e-05, SIGNIFICANT
+wtestMFAG # p = 1.49e-07, SIGNIFICANT
 
 # organic conventional
 wtestOC <- oneway.test(Shannon ~ OrgCon, data = adiv, var.equal = FALSE)
-wtestOC # p = 0.112, ns
+wtestOC # p = 0.001***, SIGNIFICANT
 
 # formal team meetings
 wtestTM <- oneway.test(Shannon ~ TeamMeetings, data = adiv, var.equal = FALSE)
-wtestTM # p = 0.72, ns
+wtestTM # p = 0.88, ns
 
 # cultural language barrier
 wtestLB <- oneway.test(Shannon ~ LangBarrier, data = adiv, var.equal = FALSE)
-wtestLB # p = 0.39, ns
+wtestLB # p = 0.02*, SIGNIFICANT
 
 # herd size
 wtestHS <- oneway.test(Shannon ~ HerdSize, data = adiv, var.equal = FALSE)
-wtestHS # p = 0.47, ns
+wtestHS # p = 0.09, ns
+
+# non-family employees
+wtestNFE <- oneway.test(Shannon ~ employees, data = adiv, var.equal = FALSE)
+wtestNFE # p = 0.003***, SIGNIFICANT
 
 # boxplots ----
 MF <- plot_richness(ps, x="Male.Female", measures=c("Shannon"), title = "Male vs. Female", color = "Male.Female") + 
@@ -163,10 +178,10 @@ ggsave(plot = HS, filename = "plots/full-run/herd-size.pdf", dpi = 600)
 
 ## Violin Plots ----
 # https://microbiome.github.io/tutorials/PlotDiversity.html 
-ps.meta <- meta(ps)
-ps.meta$Shannon <- phyloseq::estimate_richness(ps, measures = "Shannon")
+ps.meta <- meta(ps2)
+ps.meta$Shannon <- phyloseq::estimate_richness(ps2, measures = "Shannon")
 
-ps.meta$'' <- alpha(ps, index = 'shannon')
+ps.meta$'' <- alpha(ps2, index = 'shannon')
 
 # Formal Team Meetings ------------------------------------
 
@@ -197,12 +212,12 @@ ggsave(filename = "plots/full-run/violin-plot-team-meetings-stats.pdf", dpi = 60
 
 # Conventional / Organic ------------------------------------
 
-ggviolin(ps.meta, x = "Conventional.Organic", y = "Shannon$Shannon",
-               add = "boxplot", fill = "Conventional.Organic", palette = color_palette, title = "A", ylab = "Shannon's Diversity Index", xlab = "Farm Type") +
+v_C <- ggviolin(ps.meta, x = "Conventional.Organic", y = "Shannon$Shannon",
+               add = "boxplot", fill = "Conventional.Organic", palette = c("#38aaac", "#40498d"), title = "C", ylab = "Shannon's Diversity Index", xlab = "Farm Type") +
   theme(legend.position = "none")
 
 
-v_CO
+v_C
 
 # create a list of pairwise comaprisons
 CO <- unique(adiv$OrgCon) # get the variables
@@ -210,20 +225,20 @@ CO <- unique(adiv$OrgCon) # get the variables
 CO_pair <- combn(seq_along(CO), 2, simplify = FALSE, FUN = function(i)CO[i])
 
 
-v_CO <- v_CO + stat_compare_means(comparisons = CO_pair, label = "p.signif",
+v_C <- v_C + stat_compare_means(comparisons = CO_pair, label = "p.signif",
                                   symnum.args <- list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, Inf), symbols = c("****", "***", "**", "*", "ns"))
                                   )
-v_CO
+v_C
 
 
-ggsave(filename = "plots/full-run/conventional-organic-stats.pdf", dpi = 600)
+ggsave(filename = "plots/presentation/conventional-organic-stats.pdf", dpi = 600)
 
 # Age Group ------------------------------------
   
-ggviolin(ps.meta, x = "Group", y = "Shannon$Shannon",
-                 add = "boxplot", fill = "Group", palette = color_palette, title = "B", ylab = "Shannon's Diversity Index", xlab = "Age Group") +
+B <- ggviolin(ps.meta, x = "Group", y = "Shannon$Shannon",
+                 add = "boxplot", fill = "Group", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = "Age Group") +
   theme(legend.position = "none")
-v_group
+B
 
 # create a list of pairwise comaprisons
 group <- unique(adiv$AgeGroup) # get the variables
@@ -231,10 +246,10 @@ group <- unique(adiv$AgeGroup) # get the variables
 group_pair <- combn(seq_along(group), 2, simplify = FALSE, FUN = function(i)group[i])
 
 
-v_group <- v_group + stat_compare_means(comparisons = group_pair, label = "p.signif",
+v_B <- B + stat_compare_means(comparisons = group_pair, label = "p.signif",
                                   symnum.args <- list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, Inf), symbols = c("****", "***", "**", "*", "ns"))
 )
-v_group
+v_B
 
 
 ggsave(filename = "plots/full-run/cow-calf-stats.pdf", dpi = 600)
@@ -242,21 +257,21 @@ ggsave(filename = "plots/full-run/cow-calf-stats.pdf", dpi = 600)
 
 # Male / Female ------------------------------------
   
-v_MF <- ggviolin(ps.meta, x = "Male.Female", y = "Shannon$Shannon",
-                      add = "boxplot", fill = "Male.Female", palette = c("#0070FF", "#FFC55A"), title = "A", ylab = "Shannon's Diversity Index", xlab = "Primary Farm Operator Gender") +
+A <- ggviolin(ps.meta, x = "Male.Female", y = "Shannon$Shannon",
+                      add = "boxplot", fill = "Male.Female", palette = c("#38aaac", "#40498d"), title = "A", ylab = "Shannon's Diversity Index", xlab = "Primary Farm Operator Gender") +
   theme(legend.position = "none")
-v_MF
+A
 
 # create a list of pairwise comaprisons
-MF <- unique(adiv$MF) # get the variables
+A2 <- unique(adiv$MF) # get the variables
 
-MF_pair <- combn(seq_along(MF), 2, simplify = FALSE, FUN = function(i)MF[i])
+A_pair <- combn(seq_along(A2), 2, simplify = FALSE, FUN = function(i)A2[i])
 
 
-v_MF <- v_MF + stat_compare_means(comparisons = MF_pair, label = "p.signif",
+v_A <- A + stat_compare_means(comparisons = A_pair, label = "p.signif",
                                         symnum.args <- list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, Inf), symbols = c("****", "***", "**", "*", "ns"))
 )
-v_MF
+v_A
 
 
 ggsave(filename = "plots/full-run/male-female-stats.pdf", dpi = 600)
@@ -311,10 +326,10 @@ ggsave(filename = "plots/full-run/herd-size-stats.pdf", dpi = 600)
 
 # Language Barriers ------------------------------------
 
-v_CLB <- ggviolin(ps.meta, x = "Cultural.Language.Barriers", y = "Shannon$Shannon",
-                 add = "boxplot", fill = "Cultural.Language.Barriers", palette = color_palette, title = "D", ylab = "Shannon's Diversity Index", xlab = " ") +
+v_D <- ggviolin(ps.meta, x = "Cultural.Language.Barriers", y = "Shannon$Shannon",
+                 add = "boxplot", fill = "Cultural.Language.Barriers", palette = c("#38aaac", "#40498d"), title = "D", ylab = "Shannon's Diversity Index", xlab = "Language Barriers") +
                 theme(legend.position = "none")
-v_CLB
+v_D
 
 # create a list of pairwise comaprisons
 CLB <- unique(adiv$LangBarrier) # get the variables
@@ -322,10 +337,10 @@ CLB <- unique(adiv$LangBarrier) # get the variables
 CLB_pair <- combn(seq_along(CLB), 2, simplify = FALSE, FUN = function(i)CLB[i])
 
 
-v_CLB <- v_CLB + stat_compare_means(comparisons = CLB_pair, label = "p.signif",
+v_D <- v_D + stat_compare_means(comparisons = CLB_pair, label = "p.signif",
                                   symnum.args <- list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, Inf), symbols = c("****", "***", "**", "*", "ns"))
 )
-v_CLB
+v_D
 
 
 ggsave(filename = "plots/full-run/language-barriers-stats.pdf", dpi = 600)
@@ -338,12 +353,27 @@ ps <- ps %>%
 
 sample_data(ps)
 
-v_emp <- ggviolin(ps.meta, x = "employees", y = "Shannon$Shannon",
-                   add = "boxplot", fill = "Male.Female", palette = c("#0070FF", "#FFC55A"), title = "B", ylab = "Shannon's Diversity Index", xlab = "Non-Family Employees")  
-  #theme(legend.position = "none")
-v_emp
+v_E <- ggviolin(ps.meta, x = "employees", y = "Shannon$Shannon",
+                   add = "boxplot", fill = "employees", palette = c("#38aaac", "#40498d"), title = "E", ylab = "Shannon's Diversity Index", xlab = "Non-Family Employees")  +
+  theme(legend.position = "none")
+v_E
+
+# create a list of pairwise comaprisons
+NFE <- unique(adiv$employees) # get the variables
+
+NFE_pair <- combn(seq_along(NFE), 2, simplify = FALSE, FUN = function(i)NFE[i])
+
+
+v_E <- v_E + stat_compare_means(comparisons = NFE_pair, label = "p.signif",
+                                  symnum.args <- list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, Inf), symbols = c("****", "***", "**", "*", "ns"))
+)
+v_E
 
 ggsave(v_emp, filename = "plots/presentation/nonfamemp.pdf", dpi = 600)
+
+(v_A/v_B/v_C)|(v_D/v_E)
+
+ggsave(filename = "plots/presentation/all-alpha-div.pdf", dpi = 600, width = 12, height = 20)
 
 ## COMBINED PLOTS ----
 # Combined Plots Showing CO, AG, HS 
@@ -367,3 +397,10 @@ ps.meta$Shannon <- as.factor(ps.meta$Shannon)
 
 ggplot(ps.meta, aes(x=Batch, y=Conventional.Organic, fill=Run)) +
   geom_dotplot(binaxis='x', stackdir='center')
+
+sample_data(ps2)$Run <- as.character(sample_data(ps2)$Run)
+sample_data(ps)$Batch <- as.character(sample_data(ps)$Batch)
+
+plot_richness(ps2, x = "Run", measures = c("Shannon"), color = "Male.Female", shape = "Group") +
+  theme_classic()
+
