@@ -7,7 +7,7 @@ sample_data(psrel)$Non.Family.Milkers
 is.character(sample_data(psrel)$Non.Family.Milkers)
 as.character(sample_data(psrel)$Non.Family.Milkers)
 
-ps <- ps %>% 
+psrel <- psrel %>% 
   ps_mutate(
     employees = if_else(str_detect(Non.Family.Milkers, "0"), true = "No", false = "Yes")
   ) 

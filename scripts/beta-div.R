@@ -1,12 +1,21 @@
 ## BETA DIVERSITY
 
+set.seed(81299)
+
 ps <- readRDS("data/full-run/decontam-ps.RDS")
+
+ps2 <- rarefy_even_depth(ps)
 
 colors <- c("#BCF5F9", "#89C5FD", "#3A80EC", "#0229BF", "#080B6C")
 
 # transform to relative abundance
-psrel <- microbiome::transform(ps, "compositional")
+psrel <- microbiome::transform(ps2, "compositional")
 otu_table(psrel)
+
+psrel <- psrel %>% 
+  ps_mutate(
+    employees = if_else(str_detect(Non.Family.Milkers, "0"), true = "No", false = "Yes")
+  ) 
 
 # clr transform phyloseq objects
 transps <- psrel %>% 
@@ -21,29 +30,31 @@ OTU3 <- rownames_to_column(OTU2, var = "sample.id.2")
 
 dist_mat <- phyloseq::distance(transps, method = "euclidean")
 
-vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Male.Female) # p = 0.303, not sig
-vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Group) # p = 0.001***
-vegan::adonis2(dist_mat ~ Group*Male.Female, data = OTU3) # p (Group:Male.Female) = 0.559, not sig
-vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Herd.Size) # p = 0.639, not sig
-vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Conventional.Organic) # p = 0.19, not sig
-vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Formal.Team.Meetings.Frequency) # p = 0.96, not sig
-vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Cultural.Language.Barriers) # p = 0.98, not sig
+vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Male.Female) # p = 0.013*, SIGNIFICANT
+vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Group) # p = 0.001***, SIGNIFICANT
+vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Group*phyloseq::sample_data(transps)$Male.Female) # p (Group:Male.Female) = 0.399, not sig
+vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Herd.Size) # p = 0.577, not sig
+vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Conventional.Organic) # p = 0.017*, SIGNIFICANT
+vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Formal.Team.Meetings.Frequency) # p = 0.987, not sig
+vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Cultural.Language.Barriers) # p = 0.792, not sig
+vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$employees) # p = 0.086, not sig
 
-vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Run) # p = 0.332, not sig
-
-sample_data(psrel)$Run <- as.character(sample_data(psrel)$Run)
+vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Run) # p = 0.008***, SIGNIFICANT
 
 sample_data(psrel)$Cultural.Language.Barriers[sample_data(psrel)$Cultural.Language.Barriers == "Yes"] <- 1
 sample_data(psrel)$Cultural.Language.Barriers[sample_data(psrel)$Cultural.Language.Barriers == "No"] <- 2
 
 ##  PCA plot - Male Female ----
+
+sample_data(psrel)$Run <- as.character(sample_data(psrel)$Run)
+
 psrel %>% 
   # when no distance matrix or constraints are supplied, PCA is the default/auto ordination method
   tax_transform(trans = "clr") %>%
   ord_calc(method = "PCA") %>% 
-  ord_plot(color = "Run", shape = "Group") +
+  ord_plot(color = "Conventional.Organic", shape = "Group") +
   scale_color_manual(values = color_palette) +
-  stat_ellipse(aes(group = Run, color = Run)) + 
+  stat_ellipse(aes(group = Conventional.Organic, color = Conventional.Organic)) + 
   theme_classic() +
   ggtitle("A") + 
   labs(caption = "R2 = 0.016, F(1,70) = 1.07, P = 0.30")

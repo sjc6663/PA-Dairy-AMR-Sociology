@@ -8,6 +8,8 @@ set.seed(81299)
 # read in phyloseq object
 ps <- readRDS("data/full-run/sig-decontam-ps.RDS")
 
+ps2 <- rarefy_even_depth(ps)
+
 # filter out taxa that are not clinically significant and remove them
 ps <- subset_taxa(ps, 
                   sig == "TRUE")
