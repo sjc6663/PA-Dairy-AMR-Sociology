@@ -83,36 +83,38 @@ varNFE # p = 0.78, not sig
 # https://www.statology.org/welchs-anova-in-r/ 
 
 # male female
-wtestMF <- oneway.test(Shannon ~ MF, data = adiv, var.equal = FALSE)
-wtestMF # p = 0.0011**, SIGNIFICANT
+wtestMF <- t.test(Shannon ~ MF, data = adiv, var.equal = FALSE)
+wtestMF # p = 0.0009**, SIGNIFICANT
 
 # age group
-wtestAG <- oneway.test(Shannon ~ AgeGroup, data = adiv, var.equal = FALSE)
-wtestAG # p = 0.00039***, SIGNFICANT
+wtestAG <- t.test(Shannon ~ AgeGroup, data = adiv, var.equal = FALSE)
+wtestAG # p = 0.00043***, SIGNFICANT
 
 # age group as a subgroup of male/female
-wtestMFAG <- oneway.test(Shannon ~ AgeGroup*MF, data = adiv, var.equal = FALSE)
+wtestMFAG <- test.welch(Shannon ~ AgeGroup*MF, data = adiv, var.equal = FALSE)
 wtestMFAG # p = 1.49e-07, SIGNIFICANT
 
 # organic conventional
-wtestOC <- oneway.test(Shannon ~ OrgCon, data = adiv, var.equal = FALSE)
+wtestOC <- t.test(Shannon ~ OrgCon, data = adiv, var.equal = FALSE)
 wtestOC # p = 0.001***, SIGNIFICANT
 
 # formal team meetings
-wtestTM <- oneway.test(Shannon ~ TeamMeetings, data = adiv, var.equal = FALSE)
-wtestTM # p = 0.88, ns
+wtestTM <- test.welch(Shannon ~ TeamMeetings, data = adiv, var.equal = FALSE)
+wtestTM # p = 0.90, ns
 
 # cultural language barrier
-wtestLB <- oneway.test(Shannon ~ LangBarrier, data = adiv, var.equal = FALSE)
+wtestLB <- t.test(Shannon ~ LangBarrier, data = adiv, var.equal = FALSE)
 wtestLB # p = 0.02*, SIGNIFICANT
 
 # herd size
-wtestHS <- oneway.test(Shannon ~ HerdSize, data = adiv, var.equal = FALSE)
-wtestHS # p = 0.09, ns
+wtestHS <- test.welch(Shannon ~ HerdSize, data = adiv, var.equal = FALSE)
+awtestHS # p = 0.12, ns
 
 # non-family employees
-wtestNFE <- oneway.test(Shannon ~ employees, data = adiv, var.equal = FALSE)
-wtestNFE # p = 0.003***, SIGNIFICANT
+wtestNFE <- t.test(Shannon ~ employees, data = adiv, var.equal = FALSE)
+wtestNFE # p = 0.004***, SIGNIFICANT
+
+# p = 0.000111
 
 # boxplots ----
 MF <- plot_richness(ps, x="Male.Female", measures=c("Shannon"), title = "Male vs. Female", color = "Male.Female") + 
@@ -236,10 +238,11 @@ ggsave(filename = "plots/presentation/conventional-organic-stats.pdf", dpi = 600
 
 # Age Group ------------------------------------
   
-B <- ggviolin(ps.meta, x = "Group", y = "Shannon$Shannon",
+B3 <- ggviolin(ps.meta, x = "Group", y = "Shannon$Shannon",
                  add = "boxplot", fill = "Group", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = "Age Group") +
-  theme(legend.position = "none")
-B
+  theme(legend.position = "none") +
+  theme(text = element_text(size = 30), axis.title = element_text(size = 20))
+B3
 
 # create a list of pairwise comaprisons
 group <- unique(adiv$AgeGroup) # get the variables
@@ -258,10 +261,11 @@ ggsave(filename = "plots/full-run/cow-calf-stats.pdf", dpi = 600)
 
 # Male / Female ------------------------------------
   
-A <- ggviolin(ps.meta, x = "Male.Female", y = "Shannon$Shannon",
-                      add = "boxplot", fill = "Male.Female", palette = c("#38aaac", "#40498d"), title = "A", ylab = "Shannon's Diversity Index", xlab = "Primary Farm Operator Gender") +
-  theme(legend.position = "none")
-A
+B2 <- ggviolin(ps.meta, x = "Male.Female", y = "Shannon$Shannon",
+                      add = "boxplot", fill = "Male.Female", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = "Farm Manager Gender") +
+  theme(legend.position = "none") +
+  theme(text = element_text(size = 30), axis.title = element_text(size = 20))
+B2
 
 # create a list of pairwise comaprisons
 A2 <- unique(adiv$MF) # get the variables
@@ -269,10 +273,10 @@ A2 <- unique(adiv$MF) # get the variables
 A_pair <- combn(seq_along(A2), 2, simplify = FALSE, FUN = function(i)A2[i])
 
 
-v_A <- A + stat_compare_means(comparisons = A_pair, label = "p.signif",
+B2 <- B2 + stat_compare_means(comparisons = A_pair, label = "p.signif",
                                         symnum.args <- list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, Inf), symbols = c("****", "***", "**", "*", "ns"))
 )
-v_A
+B2
 
 
 ggsave(filename = "plots/full-run/male-female-stats.pdf", dpi = 600)
@@ -327,10 +331,15 @@ ggsave(filename = "plots/full-run/herd-size-stats.pdf", dpi = 600)
 
 # Language Barriers ------------------------------------
 
-v_D <- ggviolin(ps.meta, x = "Cultural.Language.Barriers", y = "Shannon$Shannon",
-                 add = "boxplot", fill = "Cultural.Language.Barriers", palette = c("#38aaac", "#40498d"), title = "D", ylab = "Shannon's Diversity Index", xlab = "Language Barriers") +
-                theme(legend.position = "none")
-v_D
+B5 <- ggviolin(ps.meta, x = "Cultural.Language.Barriers", y = "Shannon$Shannon",
+                 add = "boxplot", fill = "Cultural.Language.Barriers", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = "Language Barriers") +
+                theme(legend.position = "none") +
+  theme(text = element_text(size = 30), axis.title = element_text(size = 20))
+B5
+
+A5|B5
+
+ggsave(filename = "plots/presentation/figure5.pdf", dpi = 600, width = 10, height = 6)
 
 # create a list of pairwise comaprisons
 CLB <- unique(adiv$LangBarrier) # get the variables
@@ -354,11 +363,15 @@ ps <- ps %>%
 
 sample_data(ps)
 
-v_E <- ggviolin(ps.meta, x = "employees", y = "Shannon$Shannon",
-                   add = "boxplot", fill = "employees", palette = c("#38aaac", "#40498d"), title = "E", ylab = "Shannon's Diversity Index", xlab = "Non-Family Employees")  +
-  theme(legend.position = "none")
-v_E
+B4 <- ggviolin(ps.meta, x = "employees", y = "Shannon$Shannon",
+                   add = "boxplot", fill = "employees", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = "Non-Family Employees")  +
+  theme(legend.position = "none") +
+  theme(text = element_text(size = 30), axis.title = element_text(size = 20))
+B4
 
+(A4|B4)
+
+ggsave(filename = "plots/presentation/figure4.pdf", dpi = 600, width = 10, height = 6)
 # create a list of pairwise comaprisons
 NFE <- unique(adiv$employees) # get the variables
 

@@ -10,23 +10,30 @@ library(microViz)
 library(ggpubr)
 library(ggrepel)
 library(tibble)
+library(viridis)
 
 # load phyloseq of counts
 ps <- readRDS("data/full-run/sig-decontam-ps.RDS")
 
 # color scheme: Viridis mako / microshades micro_cvd_blue
-color_palette <- c("#0070FF", "#D75CE0", "#FF5EAA", "#FF8C76", "#FFC55A", "#F9F871")
+# color_palette <- c("#0070FF", "#D75CE0", "#FF5EAA", "#FF8C76", "#FFC55A", "#F9F871")
+ps2 <- rarefy_even_depth(ps)
+
+ps2 <- ps2 %>% 
+  ps_mutate(
+    employees = if_else(str_detect(Non.Family.Milkers, "0"), true = "No", false = "Yes")
+  ) 
 
 ## Age Group ----
 # run AlDEx2 function
-aldex2_da_G <- ALDEx2::aldex(data.frame(phyloseq::otu_table(ps)), phyloseq::sample_data(ps)$Group, taxa_rank = "all", norm = "CLR", method = "t.test", p_adjust = "BH", pvalue_cutoff = 0.05, mc_samples = 128, denom = "iqlr")
+aldex2_da_G <- ALDEx2::aldex(data.frame(phyloseq::otu_table(ps2)), phyloseq::sample_data(ps2)$Group, taxa_rank = "all", norm = "CLR", method = "t.test", p_adjust = "BH", pvalue_cutoff = 0.05, mc_samples = 128, denom = "iqlr")
 
 # look to see if anything is significant (this is for nonparametric, parametric use we.eBH)
 gsig_aldex2 <- aldex2_da_G %>%
   filter(wi.eBH < 0.05)
 
 # setup tax table to be able to merge
-taxa_info <- data.frame(tax_table(ps))
+taxa_info <- data.frame(tax_table(ps2))
 taxa_info <- taxa_info %>% rownames_to_column(var = "Gene_")
 
 # look at plot to see if positive/negative effect size corresponds to which treatment level
@@ -34,10 +41,10 @@ ALDEx2::aldex.plot(aldex2_da_G, type="MW", test="wilcox", called.cex = 1, cutoff
 
 # make a table of significant corrected p-values
 gsig_aldex2 <- aldex2_da_G %>%
-  rownames_to_column(var = "Gene_") %>%
+  rownames_to_column(var = "Gene") %>%
   filter(wi.eBH < 0.05) %>%
   arrange(effect, wi.eBH) %>%
-  dplyr::select(Gene_, diff.btw, diff.win, effect, wi.ep, wi.eBH)
+  dplyr::select(Gene, diff.btw, diff.win, effect, wi.ep, wi.eBH)
 
 # add in previously formed taxa information to complete the table
 gsig_aldex2 <- left_join(gsig_aldex2, taxa_info)
@@ -47,13 +54,13 @@ write.csv(gsig_aldex2, file = "tables/aldex-cow-calf.csv")
 ggplot(data = gsig_aldex2, aes(x = Broadclass, y = effect)) +
   geom_point()
   
-ggplot(data=gsig_aldex2, aes(x=Broadclass, y=(effect), col=Broadclass, label=Gene)) +
+ggplot(data=gsig_aldex2, aes(x=sig, y=(effect), col="black", label=Gene)) +
   geom_point() + 
-  geom_jitter() +
+  #geom_jitter() +
   theme_minimal() +
   geom_text_repel() +
-  scale_color_manual(values = color_palette) +
-  #geom_vline(xintercept=c(-0.6, 0.6), col="red") +
+  scale_color_viridis(option = "mako", discrete = TRUE) +
+  #geom_vline(xintercept=0, col="black") +
   geom_hline(yintercept=0, col="black") +
   theme(legend.position = "none")
 
@@ -62,7 +69,7 @@ ggsave(filename = "plots/full-run/aldex2-cow-calf.pdf", dpi = 600)
 
 ## Male Female ----
 # run AlDEx2 function
-aldex2_da_MF <- ALDEx2::aldex(data.frame(phyloseq::otu_table(ps)), phyloseq::sample_data(ps)$Male.Female, taxa_rank = "all", norm = "CLR", method = "t.test", p_adjust = "BH", pvalue_cutoff = 0.05, mc_samples = 128, denom = "iqlr")
+aldex2_da_MF <- ALDEx2::aldex(data.frame(phyloseq::otu_table(ps2)), phyloseq::sample_data(ps2)$Male.Female, taxa_rank = "all", norm = "CLR", method = "t.test", p_adjust = "BH", pvalue_cutoff = 0.05, mc_samples = 128, denom = "iqlr")
 
 # look to see if anything is significant (this is for nonparametric, parametric use we.eBH)
 mfsig_aldex2 <- aldex2_da_MF %>%
@@ -73,10 +80,10 @@ ALDEx2::aldex.plot(aldex2_da_MF, type="MW", test="wilcox", called.cex = 1, cutof
 
 # make a table of significant corrected p-values
 mfsig_aldex2 <- aldex2_da_MF %>%
-  rownames_to_column(var = "Gene_") %>%
+  rownames_to_column(var = "Gene") %>%
   filter(wi.eBH < 0.05) %>%
   arrange(effect, wi.eBH) %>%
-  dplyr::select(Gene_, diff.btw, diff.win, effect, wi.ep, wi.eBH)
+  dplyr::select(Gene, diff.btw, diff.win, effect, wi.ep, wi.eBH)
 
 # add in previously formed taxa information to complete the table
 mfsig_aldex2 <- left_join(mfsig_aldex2, taxa_info)
@@ -94,7 +101,7 @@ ggplot(data=mfsig_aldex2, aes(x=Broadclass, y=(effect), col=Broadclass, label=Ge
 
 ## Organic Conventional ----
 # run AlDEx2 function
-aldex2_da_OC <- ALDEx2::aldex(data.frame(phyloseq::otu_table(ps)), phyloseq::sample_data(ps)$Conventional.Organic, taxa_rank = "all", norm = "CLR", method = "t.test", p_adjust = "BH", pvalue_cutoff = 0.05, mc_samples = 128, denom = "iqlr")
+aldex2_da_OC <- ALDEx2::aldex(data.frame(phyloseq::otu_table(ps2)), phyloseq::sample_data(ps2)$Conventional.Organic, taxa_rank = "all", norm = "CLR", method = "t.test", p_adjust = "BH", pvalue_cutoff = 0.05, mc_samples = 128, denom = "iqlr")
 
 # look to see if anything is significant (this is for nonparametric, parametric use we.eBH)
 ocsig_aldex2 <- aldex2_da_OC %>%
@@ -105,10 +112,10 @@ ALDEx2::aldex.plot(aldex2_da_OC, type="MW", test="wilcox", called.cex = 1, cutof
 
 # make a table of significant corrected p-values
 ocsig_aldex2 <- aldex2_da_OC %>%
-  rownames_to_column(var = "Gene_") %>%
+  rownames_to_column(var = "Gene") %>%
   filter(wi.eBH < 0.05) %>%
   arrange(effect, wi.eBH) %>%
-  dplyr::select(Gene_, diff.btw, diff.win, effect, wi.ep, wi.eBH)
+  dplyr::select(Gene, diff.btw, diff.win, effect, wi.ep, wi.eBH)
 
 # add in previously formed taxa information to complete the table
 ocsig_aldex2 <- left_join(ocsig_aldex2, taxa_info)
