@@ -49,4 +49,8 @@ abund <- merge(phy, ids, by = "OTU")
 abund$percent <- abund$Abundance * 100
 abund$percent <- round(abund$percent, digits = 0)
 
+# NOTES ABOUT PAPER ----
+
+# try what Ana did to make sure I don't have unclassified 
+# make sure alpha diversity figures start at 0
 

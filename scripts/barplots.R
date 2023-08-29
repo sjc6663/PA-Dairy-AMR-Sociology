@@ -18,12 +18,13 @@ library(ggpubr)
 
 # read in phyloseq object
 ps <- readRDS("data/full-run/decontam-ps.RDS")
-ps2 <- readRDS("data/full-run/sig-decontam-ps.RDS")
+# ps2 <- readRDS("data/full-run/sig-decontam-ps.RDS")
 
 # transform to relative abundance
 psrel <- microbiome::transform(ps, "compositional")
-psrel2 <- microbiome::transform(ps2, "compositional")
+# psrel2 <- microbiome::transform(ps2, "compositional")
 
+## for Old Style barplots ----
 meltdf <- psmelt(ps)
 meltdf2 <- psmelt(psrel)
 
@@ -33,11 +34,9 @@ out3 <- meltdf2[meltdf2$Abundance != 0.0000000000, ]
 
 write.csv(meltdf, file = "tables/melted-phyloseq.csv")
 write.csv(meltdf2, file = "tables/melted-phyloseq-relabund.csv")
-
-### ------------------------------------------------------------------------
 #plot 
 
-# Male Female - Cows and Calves ----
+# Male Female - Cows and Calves
 C <- ggplot(out3, aes(x=Broadclass)) + 
   geom_bar()+
   theme_bw()+
@@ -63,7 +62,7 @@ C
 
 ggsave(filename = "plots/full-run/MF-calves-cows.pdf", dpi = 600)
 
-# Male Female ----
+# Male Female 
 A <- ggplot(out2, aes(x=Broadclass, fill = Sample.Type)) + 
   geom_bar()+
   theme_bw() +
@@ -91,7 +90,7 @@ A|B|C
 
 ggsave(filename = "plots/full-run/MF-cow-calf-combo.pdf", dpi = 600, height = 12, width = 18)
 
-# Cows Calves ----
+# Cows Calves 
 B <- ggplot(out2, aes(x=Broadclass, fill = Sample.Type)) + 
   geom_bar()+
   theme_bw()+
@@ -115,7 +114,7 @@ B <- ggplot(out2, aes(x=Broadclass, fill = Sample.Type)) +
 
 ggsave(filename = "plots/full-run/calves-cows.pdf", dpi = 600)
 
-# Herd Size ----
+# Herd Size
 
 out3$Herd.Size <- factor(out3$Herd.Size,
        levels = c("0-50", "50-100", "100-150", "150-200", "200+"))
@@ -143,7 +142,7 @@ HS <- ggplot(out3, aes(x=Broadclass, fill = Herd.Size)) +
 
 ggsave(filename = "plots/full-run/herd-size.pdf", dpi = 600)
 
-# Organic Conventional ----
+# Organic Conventional
 OC <- ggplot(out2, aes(x=Broadclass, fill = Conventional.Organic)) + 
   geom_bar()+
   theme_bw()+
@@ -172,7 +171,7 @@ B | OC | HS
 ggsave(filename = "plots/full-run/soc-barplot.pdf", dpi = 600, height = 12, width = 18)
 
 
-# Team Meetings ----
+# Team Meetings
 
 out2$Formal.Team.Meetings.Frequency <- factor(out2$Formal.Team.Meetings.Frequency,
                                                            levels = c("Never", "1 or 2 times/year", "Quarterly", "Once a month", "At least twice a month"))
@@ -202,7 +201,7 @@ TM <- ggplot(out2, aes(x=Broadclass, fill = Formal.Team.Meetings.Frequency)) +
 ggsave(filename = "plots/full-run/team-meetings.pdf", dpi = 600)
 
 
-# Language Barriers ----
+# Language Barriers
 LB <- ggplot(out2, aes(x=Broadclass, fill = Cultural.Language.Barriers)) + 
   geom_bar()+
   theme_bw()+
@@ -240,24 +239,25 @@ psbclass <- aggregate_taxa(psrel, level = "Broadclass")
 # find and substitute
 taxa_names(psbclass) <- gsub(taxa_names(psbclass), pattern = "_", replacement = " ") 
 
-psbclass %>% plot_composition(average_by = "Male.Female", sample.sort = "Male.Female", x.label = "Male.Female") +
+A <- psbclass %>% plot_composition(average_by = "Male.Female", sample.sort = "Male.Female", x.label = "Male.Female") +
   # change y axis to be percentages instead of numbers
   scale_y_continuous(labels = scales::percent) +
   scale_fill_viridis(option = "mako", discrete = TRUE) + 
-  theme(text = element_text(size = 30)) + 
-  labs(x = " ", fill='Compound Type') +
-  scale_x_discrete(guide = guide_axis(angle = 0))
+  theme(text = element_text(size = 20)) + 
+  theme(legend.position = "top") +
+  labs(x = " ", fill=' ') +
+  scale_x_discrete(guide = guide_axis(angle = 0)) +
   ggtitle("A")
   
 ggsave(filename = "plots/presentation/relabund-fig2.pdf", dpi = 600, width = 20, height = 16)
 
-psbclass %>% plot_composition(average_by = "Group", sample.sort = "Group", x.label = "Group") +
-  # scale__continuous(labels = percent) +
-  #theme(legend.position = "none") +
+A <- psbclass %>% plot_composition(average_by = "Group", sample.sort = "Group", x.label = "Group") +
+  scale_y_continuous(labels = scales::percent) +
+  theme(legend.position = "top") +
   scale_fill_viridis(option = "mako", discrete = TRUE) + 
-  theme(text = element_text(size = 30)) +
-  labs(x = " ", fill = "Compound Type") +
-  scale_x_discrete(guide = guide_axis(angle = 0))
+  theme(text = element_text(size = 20)) +
+  labs(x = " ", fill = " ") +
+  scale_x_discrete(guide = guide_axis(angle = 0)) +
   ggtitle("A")
 
   ggsave(filename = "plots/presentation/relabund-fig3.pdf", dpi = 600, width = 20, height = 16)
@@ -296,23 +296,24 @@ psbclass <- psbclass %>%
     employees = if_else(str_detect(Non.Family.Milkers, "0"), true = "Family", false = "Non-Family")
   ) 
 
-psbclass %>% plot_composition(average_by = "employees", x.label = "employees") +
-  # scale__continuous(labels = percent) +
-  # theme(legend.position = "none") +
+A <- psbclass %>% plot_composition(average_by = "employees", x.label = "employees") +
+  scale_y_continuous(labels = scales::percent) +
+  theme(legend.position = "top") +
   scale_fill_viridis(option = "mako", discrete = TRUE) + 
-  theme(text = element_text(size = 30)) +
-  labs(x = " ") +
-  scale_x_discrete(guide = guide_axis(angle = 0))
+  theme(text = element_text(size = 20)) +
+  labs(x = " ", fill = " ") +
+  scale_x_discrete(guide = guide_axis(angle = 0)) +
   ggtitle("A")
 
   ggsave(filename = "plots/presentation/relabund-fig4.pdf", dpi = 600, width = 20, height = 16)
   
-A5 <- psbclass %>% plot_composition(average_by = "Cultural.Language.Barriers", sample.sort = "Cultural.Language.Barriers", x.label = "Cultural.Language.Barriers") +
-  # scale__continuous(labels = percent) +
-  theme(legend.position = "none") +
+A <- psbclass %>% plot_composition(average_by = "Cultural.Language.Barriers", sample.sort = "Cultural.Language.Barriers", x.label = "Cultural.Language.Barriers") +
+  scale_y_continuous(labels = scales::percent) +
+  theme(legend.position = "top") +
   scale_fill_viridis(option = "mako", discrete = TRUE) + 
-  theme(text = element_text(size = 30)) +
-  labs(x = " ") +
+  theme(text = element_text(size = 20)) +
+  labs(x = " ", fill = " ") +
+  scale_x_discrete(guide = guide_axis(angle = 0)) +
   ggtitle("A")
 
 leg <- get_legend(C)
@@ -323,7 +324,7 @@ ggsave(filename = "plots/presentation/relabund-fig1.pdf", dpi = 600, width = 16,
 
 
 psbclass %>% plot_composition(average_by = "Farm", sample.sort = "Conventional.Organic", x.label = "Farm", group_by = "Conventional.Organic") +
-  # scale__continuous(labels = percent) +
+  scale_y_continuous(labels = scales::percent) +
   #theme(legend.position = "none") +
   scale_fill_viridis(option = "mako", discrete = TRUE) + 
   theme(text = element_text(size = 30)) +
@@ -333,11 +334,12 @@ psbclass %>% plot_composition(average_by = "Farm", sample.sort = "Conventional.O
 ggsave(filename = "plots/presentation/relabund-fig1.pdf", dpi = 600, width = 20, height = 16)
 
 psbclass %>% plot_composition(group_by = "Farm", sample.sort = "Group", x.label = "Group") +
-  # scale_y_continuous(labels = percent) +
+  scale_y_continuous(labels = scales::percent) +
   # theme(legend.position = "none") +
   scale_fill_viridis(option = "mako", discrete = TRUE) +
   theme(text = element_text(size = 20)) +
-  labs(x = " ", fill='Compound Type')
+  labs(x = " ", fill=' ')
+  scale_x_discrete(guide = guide_axis(angle = 0))
   ggtitle("A")
 
 ggsave(filename = "plots/presentation/figure1.pdf", dpi = 600, width = 17, height = 9)

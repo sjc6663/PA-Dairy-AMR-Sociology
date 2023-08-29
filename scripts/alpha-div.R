@@ -31,7 +31,7 @@ ps2 <- rarefy_even_depth(ps)
 
 ps2 <- ps2 %>% 
   ps_mutate(
-    employees = if_else(str_detect(Non.Family.Milkers, "0"), true = "No", false = "Yes")
+    employees = if_else(str_detect(Non.Family.Milkers, "0"), true = "Family", false = "Non-Family")
   ) 
 
 # create data frame ----
@@ -238,11 +238,11 @@ ggsave(filename = "plots/presentation/conventional-organic-stats.pdf", dpi = 600
 
 # Age Group ------------------------------------
   
-B3 <- ggviolin(ps.meta, x = "Group", y = "Shannon$Shannon",
-                 add = "boxplot", fill = "Group", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = "Age Group") +
+B <- ggviolin(ps.meta, x = "Group", y = "Shannon$Shannon",
+                 add = "boxplot", fill = "Group", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = " ") +
   theme(legend.position = "none") +
-  theme(text = element_text(size = 30), axis.title = element_text(size = 20))
-B3
+  theme(text = element_text(size = 20), axis.title = element_text(size = 20))
+B
 
 # create a list of pairwise comaprisons
 group <- unique(adiv$AgeGroup) # get the variables
@@ -261,10 +261,10 @@ ggsave(filename = "plots/full-run/cow-calf-stats.pdf", dpi = 600)
 
 # Male / Female ------------------------------------
   
-B2 <- ggviolin(ps.meta, x = "Male.Female", y = "Shannon$Shannon",
-                      add = "boxplot", fill = "Male.Female", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = "Farm Manager Gender") +
+B <- ggviolin(ps.meta, x = "Male.Female", y = "Shannon$Shannon",
+                      add = "boxplot", fill = "Male.Female", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = " ") +
   theme(legend.position = "none") +
-  theme(text = element_text(size = 30), axis.title = element_text(size = 20))
+  theme(text = element_text(size = 20), axis.title = element_text(size = 20))
 B2
 
 # create a list of pairwise comaprisons
@@ -331,15 +331,15 @@ ggsave(filename = "plots/full-run/herd-size-stats.pdf", dpi = 600)
 
 # Language Barriers ------------------------------------
 
-B5 <- ggviolin(ps.meta, x = "Cultural.Language.Barriers", y = "Shannon$Shannon",
-                 add = "boxplot", fill = "Cultural.Language.Barriers", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = "Language Barriers") +
+B <- ggviolin(ps.meta, x = "Cultural.Language.Barriers", y = "Shannon$Shannon",
+                 add = "boxplot", fill = "Cultural.Language.Barriers", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = " ") +
                 theme(legend.position = "none") +
-  theme(text = element_text(size = 30), axis.title = element_text(size = 20))
+  theme(text = element_text(size = 20), axis.title = element_text(size = 20))
 B5
 
-A5|B5
+A|B
 
-ggsave(filename = "plots/presentation/figure5.pdf", dpi = 600, width = 10, height = 6)
+ggsave(filename = "plots/presentation/figure5.pdf", dpi = 600, width = 18, height = 10)
 
 # create a list of pairwise comaprisons
 CLB <- unique(adiv$LangBarrier) # get the variables
@@ -363,15 +363,15 @@ ps <- ps %>%
 
 sample_data(ps)
 
-B4 <- ggviolin(ps.meta, x = "employees", y = "Shannon$Shannon",
-                   add = "boxplot", fill = "employees", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = "Non-Family Employees")  +
+B <- ggviolin(ps.meta, x = "employees", y = "Shannon$Shannon",
+                   add = "boxplot", fill = "employees", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = " ")  +
   theme(legend.position = "none") +
-  theme(text = element_text(size = 30), axis.title = element_text(size = 20))
+  theme(text = element_text(size = 20), axis.title = element_text(size = 20))
 B4
 
-(A4|B4)
+(A|B)
 
-ggsave(filename = "plots/presentation/figure4.pdf", dpi = 600, width = 10, height = 6)
+ggsave(filename = "plots/presentation/figure4.pdf", dpi = 600, width = 18, height = 12)
 # create a list of pairwise comaprisons
 NFE <- unique(adiv$employees) # get the variables
 

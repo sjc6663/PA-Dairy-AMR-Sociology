@@ -109,7 +109,7 @@ vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Run) # p = 0.008***, SI
 
 sample_data(psrel)$Run <- as.character(sample_data(psrel)$Run)
 
-A <- psrel %>% 
+C <- psrel %>% 
   # when no distance matrix or constraints are supplied, PCA is the default/auto ordination method
   tax_transform(trans = "clr") %>%
   ord_calc(method = "PCA") %>% 
@@ -118,14 +118,14 @@ A <- psrel %>%
   stat_ellipse(aes(group = Male.Female, color = Male.Female)) + 
   theme_classic() +
   labs(color = "Gender") +
-  ggtitle("A") + 
+  ggtitle("C") + 
   labs(caption = "R2 = 0.018, F(1,70) = 1.30, P = 0.032*") +
-  theme(text = element_text(size = 30)) 
+  theme(text = element_text(size = 20)) 
 C2
 
-(A2|B2)/C2
+(A|B)/C
 
-ggsave(filename = "plots/presentation/figure2.pdf", dpi = 600, width = 18, height = 12)
+ggsave(filename = "plots/presentation/figure3.pdf", dpi = 600, width = 18, height = 12)
 
 ##  PCA plot - Male Female Age Group ----
 B_soc <- psrel %>% 
@@ -203,7 +203,7 @@ B
 ggsave(filename = "plots/full-run/PCA-farm-type.pdf", dpi = 600)
 
 ##  PCA plot - Age Group  ----
-B <- psrel %>% 
+C <- psrel %>% 
   # when no distance matrix or constraints are supplied, PCA is the default/auto ordination method
   tax_transform(trans = "clr") %>%
   ord_calc(method = "PCA") %>% 
@@ -211,10 +211,10 @@ B <- psrel %>%
   scale_color_manual(values = c("#38aaac", "#40498d")) +
   stat_ellipse(aes(group = Group, color = Group)) + 
   theme_classic() +
-  ggtitle("B") + 
+  ggtitle("C") + 
   labs(color = "Age Group") +
   labs(caption = "R2 = 0.035, F(1, 70) = 2.53, P = 0.001***") +
-  theme(text = element_text(size = 30)) 
+  theme(text = element_text(size = 20)) 
 
 C3
 
