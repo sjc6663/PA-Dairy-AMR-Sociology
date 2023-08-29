@@ -241,7 +241,8 @@ ggsave(filename = "plots/presentation/conventional-organic-stats.pdf", dpi = 600
 B <- ggviolin(ps.meta, x = "Group", y = "Shannon$Shannon",
                  add = "boxplot", fill = "Group", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = " ") +
   theme(legend.position = "none") +
-  theme(text = element_text(size = 20), axis.title = element_text(size = 20))
+  theme(text = element_text(size = 20), axis.title = element_text(size = 20)) +
+  scale_y_continuous(limits = c(1, 7))
 B
 
 # create a list of pairwise comaprisons
@@ -264,7 +265,8 @@ ggsave(filename = "plots/full-run/cow-calf-stats.pdf", dpi = 600)
 B <- ggviolin(ps.meta, x = "Male.Female", y = "Shannon$Shannon",
                       add = "boxplot", fill = "Male.Female", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = " ") +
   theme(legend.position = "none") +
-  theme(text = element_text(size = 20), axis.title = element_text(size = 20))
+  theme(text = element_text(size = 20), axis.title = element_text(size = 20)) +
+  scale_y_continuous(limits = c(1, 6))
 B2
 
 # create a list of pairwise comaprisons
@@ -334,7 +336,8 @@ ggsave(filename = "plots/full-run/herd-size-stats.pdf", dpi = 600)
 B <- ggviolin(ps.meta, x = "Cultural.Language.Barriers", y = "Shannon$Shannon",
                  add = "boxplot", fill = "Cultural.Language.Barriers", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = " ") +
                 theme(legend.position = "none") +
-  theme(text = element_text(size = 20), axis.title = element_text(size = 20))
+  theme(text = element_text(size = 20), axis.title = element_text(size = 20)) +
+  scale_y_continuous(limits = c(1, 6))
 B5
 
 A|B
@@ -366,7 +369,8 @@ sample_data(ps)
 B <- ggviolin(ps.meta, x = "employees", y = "Shannon$Shannon",
                    add = "boxplot", fill = "employees", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = " ")  +
   theme(legend.position = "none") +
-  theme(text = element_text(size = 20), axis.title = element_text(size = 20))
+  theme(text = element_text(size = 20), axis.title = element_text(size = 20)) +
+  scale_y_continuous(limits = c(1, 6))
 B4
 
 (A|B)

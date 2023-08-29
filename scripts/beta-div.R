@@ -125,7 +125,7 @@ C2
 
 (A|B)/C
 
-ggsave(filename = "plots/presentation/figure3.pdf", dpi = 600, width = 18, height = 12)
+ggsave(filename = "plots/presentation/figure2.pdf", dpi = 600, width = 18, height = 12)
 
 ##  PCA plot - Male Female Age Group ----
 B_soc <- psrel %>% 
@@ -218,7 +218,7 @@ C <- psrel %>%
 
 C3
 
-(A3|B3)/C3
+(A|B)/C
 
 ggsave(filename = "plots/presentation/figure3.pdf", dpi = 600, width = 18, height = 12)
 
