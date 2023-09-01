@@ -91,6 +91,7 @@ orgtransps <- org %>%
 dist_mat <- phyloseq::distance(transps, method = "euclidean")
 org_dist_mat <- phyloseq::distance(orgtransps, method = "euclidean")
 
+vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Male.Female + phyloseq::sample_data(transps)$Run + phyloseq::sample_data(transps)$Male.Female*phyloseq::sample_data(transps)$Run)
 
 vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Male.Female) # p = 0.009**, SIGNIFICANT
 vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Group) # p = 0.001***, SIGNIFICANT
