@@ -39,7 +39,7 @@ A <- psbclass %>% plot_composition(average_by = "Male.Female", sample.sort = "Ma
   # change y axis to be percentages instead of numbers
   scale_y_continuous(labels = scales::percent) +
   scale_fill_viridis(option = "mako", discrete = TRUE) + 
-  theme(text = element_text(size = 20)) + 
+  theme(text = element_text(size = 15)) + 
   theme(legend.position = "top") +
   labs(x = " ", fill=' ') +
   scale_x_discrete(guide = guide_axis(angle = 0)) +
@@ -90,7 +90,7 @@ ps.meta$'' <- alpha(sig, index = 'shannon')
 B <- ggviolin(ps.meta, x = "Male.Female", y = "Shannon$Shannon",
               add = "boxplot", fill = "Group", palette = c("#367aa1", "#def4e5"), title = "B", ylab = "Shannon's Diversity Index", xlab = " ") +
   theme(legend.position = "none") +
-  theme(text = element_text(size = 20), axis.title = element_text(size = 20)) +
+  theme(text = element_text(size = 15), axis.title = element_text(size = 15)) +
   scale_y_continuous(limits = c(1, 7))
 B
 
@@ -122,7 +122,7 @@ C <- psrel %>%
   labs(color = "Gender") +
   ggtitle("C") + 
   labs(caption = "R2 = 0.019, F(1,70) = 1.34, P = 0.007**") +
-  theme(text = element_text(size = 20)) 
+  theme(text = element_text(size = 15)) 
 C
 
 (A|B)/C
