@@ -1,6 +1,10 @@
 # Figure 7 - clinically significant genes, gender (rel abund, alpha, beta)
 # SAB 09/12/2023
 
+# null statistical hypothesis:
+  # alpha diversity - Shannon's Diversity Index of females = Shannon's Diversity Index of males
+  # beta diversity - sample distribution/makeup of females = sample distribution/makeup of males
+
 # setup ----
 # load packages
 library(phyloseq)
@@ -22,6 +26,8 @@ library(vegan)
 set.seed(81299)
 
 ps2 <- readRDS("data/full-run/sig-decontam-ps.RDS")
+
+ps2 <- rarefy_even_depth(ps2)
 
 # filter out taxa that are not clinically significant and remove them
 sig <- subset_taxa(ps2, 
@@ -68,18 +74,20 @@ phy
 # create data frame with relevant metadata for comparison
 adiv <- data.frame(
   "Shannon" = phyloseq::estimate_richness(sig, measures = "Shannon"),
-  "MF" = phyloseq::sample_data(sig)$Male.Female
+  "MF" = phyloseq::sample_data(sig)$Male.Female, 
+  "batch" = phyloseq::sample_data(sig)$Run
 )
 
 # test variance
 # Male Female 
 varMF <- var.test(Shannon ~ MF, data = adiv, 
                   alternative = "two.sided")
-varMF # p = 0.55, not sig
+varMF # p = 0.52, not sig
 
 # # male female
-wtestMF <- t.test(Shannon ~ MF, data = adiv, var.equal = FALSE)
-wtestMF # p = 0.0005**, SIGNIFICANT
+wtestMF <- lm(Shannon ~ MF + run + batch + MF*run*batch, data = adiv)
+summary(wtestMF) # p = 0.91, ns
+
 
 # violin plot 
 ps.meta <- meta(sig)
@@ -107,7 +115,7 @@ transps <- psrel %>%
 dist_mat <- phyloseq::distance(transps, method = "euclidean")
 
 # test
-vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Male.Female) # R2 = 0.019, F(1,70) = 1.34, P = 0.007**
+vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Male.Female*phyloseq::sample_data(transps)$Batch) # R2 = 0.021, F(1,70) = 1.49, P = 0.006**
 
 # plot
 
@@ -115,13 +123,13 @@ C <- psrel %>%
   # when no distance matrix or constraints are supplied, PCA is the default/auto ordination method
   tax_transform(trans = "clr") %>%
   ord_calc(method = "PCA") %>% 
-  ord_plot(color = "Male.Female", size = 6, axes = c(1,2)) +
+  ord_plot(color = "Male.Female", size = 6, axes = c(2,3)) +
   scale_color_manual(values = c("#367aa1", "#def4e5")) +
   stat_ellipse(aes(group = Male.Female, color = Male.Female)) + 
   theme_classic() +
   labs(color = "Gender") +
   ggtitle("C") + 
-  labs(caption = "R2 = 0.019, F(1,70) = 1.34, P = 0.007**") +
+  labs(caption = "R2 = 0.021, F(1,70) = 1.49, P = 0.006**") +
   theme(text = element_text(size = 15)) 
 C
 
