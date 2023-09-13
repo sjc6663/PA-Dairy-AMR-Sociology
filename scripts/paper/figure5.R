@@ -19,7 +19,7 @@ library(car)
 library(misty)
 library(vegan)
 
-set.seet(81299)
+set.seed(81299)
 
 # read in phyloseq object
 ps <- readRDS("data/full-run/decontam-ps.RDS")
