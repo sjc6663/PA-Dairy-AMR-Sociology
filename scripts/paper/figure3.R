@@ -18,16 +18,15 @@ library(dplyr)
 library(car)
 library(misty)
 library(vegan)
+library(tibble)
 
 set.seed(81299)
 
 # read in phyloseq object
 ps <- readRDS("data/full-run/decontam-ps.RDS")
 
-ps2 <- rarefy_even_depth(ps)
-
 # transform to relative abundance
-psrel <- microbiome::transform(ps2, "compositional")
+psrel <- microbiome::transform(ps, "compositional")
 
 # relative abundance ----
 psbclass <- aggregate_taxa(psrel, level = "Broadclass")
@@ -45,62 +44,96 @@ A <- psbclass %>% plot_composition(average_by = "Male.Female", sample.sort = "Ma
   scale_x_discrete(guide = guide_axis(angle = 0)) +
   ggtitle("A")
 
+# relative abundance plot percentages ----
+# merge samples by comparative categories (metadata) we want
+mps <- merge_samples(psrel, "Male.Female")
+
+# create a dataframe with the aggregated abundances for desired tax rank
+phy <- mps %>% tax_glom(taxrank = "Broadclass") %>% transform_sample_counts(function(x) {x/sum(x)}) %>% psmelt()
+
+# select only relevant columns
+phy <- select(phy, c("Sample", "Broadclass", "Abundance"))
+
+# get abundance as a percent and round to whole numbers
+phy$percent <- phy$Abundance * 100
+phy$percent <- round(phy$percent, digits = 0)
+
+phy <- select(phy, "Sample", "Broadclass", "percent")
+
+phy
+
 # alpha diversity ----
 adiv <- data.frame(
-  "Shannon" = phyloseq::estimate_richness(ps2, measures = "Shannon"),
-  "MF" = phyloseq::sample_data(ps2)$Male.Female,
-  "batch" = phyloseq::sample_data(ps2)$Batch,
-  "run" = phyloseq::sample_data(ps2)$Run,
-  "aff" = phyloseq::sample_data(ps2)$affiliation
+  "Shannon" = phyloseq::estimate_richness(ps, measures = "Shannon"),
+  "MF" = phyloseq::sample_data(ps)$Male.Female,
+  "batch" = phyloseq::sample_data(ps)$Batch,
+  "run" = phyloseq::sample_data(ps)$Run,
+  "aff" = phyloseq::sample_data(ps)$affiliation, 
+  "type" = phyloseq::sample_data(ps)$Conventional.Organic
 )
 
-# test variance
-# Male Female 
-varMF <- var.test(Shannon ~ MF, data = adiv, 
-                  alternative = "two.sided")
-varMF # p = 0.05, not sig
 
-# male female
-model <- lm(Shannon ~ MF + run + batch + aff + MF*run*batch*aff, data = adiv)
-summary(model) # p = 0.98, ns
+# get residuals
+model <- lm(Shannon ~ aff + run + batch + type, data = adiv)
+residuals <- resid(model)
+
+res <- as.data.frame(residuals)
+res <- rownames_to_column(res, "samp")
+
+adiv <- rownames_to_column(adiv, "samp")
+dat1 <- merge(adiv, res, by = "samp")
+
+dat1 <- column_to_rownames(dat1, "samp")
+
+model2 <- lm(residuals ~ MF, data = dat1)
+summary(model2) # P = 0.0216*
 
 # violin plot
-ps.meta <- meta(ps2)
-ps.meta$Shannon <- phyloseq::estimate_richness(ps2, measures = "Shannon")
+ps.meta <- meta(ps)
+ps.meta$Shannon <- phyloseq::estimate_richness(ps, measures = "Shannon")
 
-ps.meta$'' <- alpha(ps2, index = 'shannon')
+ps.meta$'' <- alpha(ps, index = 'shannon')
 
 B <- ggviolin(ps.meta, x = "Male.Female", y = "Shannon$Shannon",
               add = "boxplot", fill = "Male.Female", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = " ") +
   theme(legend.position = "none") +
   theme(text = element_text(size = 20), axis.title = element_text(size = 20)) +
-  scale_y_continuous(limits = c(1, 6))
+  scale_y_continuous(limits = c(1, 7))
 
 # beta diversity ----
 
-# clr transform phyloseq objects
-transps <- psrel %>% 
-  tax_transform(trans = "clr") %>% 
-  ps_get()
+ait <- ps %>%
+  # transform to relative abundance
+  tax_transform("compositional", keep_counts = FALSE) %>%
+  dist_calc("aitchison")
 
-dist_mat <- phyloseq::distance(transps, method = "euclidean")
 
-vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Male.Female*phyloseq::sample_data(transps)$Run*phyloseq::sample_data(transps)$Batch*phyloseq::sample_data(transps)$affiliation)
-# R2 = 0.02, F(1, 57) = 1.37, P = 0.011*
+# test beta dispersion
+ait %>% dist_bdisp(variables = "Male.Female") %>% bdisp_get() # p=0.261
+
+# test with PERMANOVA
+mod1 <- ait %>%
+  dist_permanova(
+    seed = 81299,
+    variables = "Male.Female + Run + Batch + affiliation + Conventional.Organic",
+    n_perms = 9999
+  )
+
+mod1 # R2 = 0.02, F(1, 65) = 1.16, P = 0.069
 
 C <- psrel %>% 
   # when no distance matrix or constraints are supplied, PCA is the default/auto ordination method
   tax_transform(trans = "clr") %>%
   ord_calc(method = "PCA") %>% 
-  ord_plot(color = "Male.Female", size = 6, axes = c(2,3)) +
+  ord_plot(color = "Male.Female", size = 6, axes = c(1,3)) +
   scale_color_manual(values = c("#40498d", "#38aaac")) +
   stat_ellipse(aes(group = Male.Female, color = Male.Female)) + 
   theme_classic() +
   labs(color = "Gender") +
   ggtitle("C") + 
-  labs(caption = "R2 = 0.02, F(1, 57) = 1.37, P = 0.011*") +
+  labs(caption = "R2 = 0.02, F(1, 65) = 1.16, P = 0.069") +
   theme(text = element_text(size = 20)) 
 
 (A|B)/C
 
-ggsave(filename = "plots/paper/figure3.pdf", dpi = 600, width = 20, height = 18)
+ggsave(filename = "plots/paper/figure3.pdf", dpi = 600, width = 22, height = 16)

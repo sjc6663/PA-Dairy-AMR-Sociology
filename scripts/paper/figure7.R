@@ -22,12 +22,11 @@ library(dplyr)
 library(car)
 library(misty)
 library(vegan)
+library(tibble)
 
 set.seed(81299)
 
 ps2 <- readRDS("data/full-run/sig-decontam-ps.RDS")
-
-ps2 <- rarefy_even_depth(ps2)
 
 # filter out taxa that are not clinically significant and remove them
 sig <- subset_taxa(ps2, 
@@ -66,7 +65,7 @@ phy <- select(phy, c("Sample", "Broadclass", "Abundance"))
 phy$percent <- phy$Abundance * 100
 phy$percent <- round(phy$percent, digits = 0)
 
-phy <- select(phy, "Sample", "Broadclass", "percent")
+phy <- dplyr::select(phy, "Sample", "Broadclass", "percent")
 
 phy
 
@@ -74,19 +73,27 @@ phy
 # create data frame with relevant metadata for comparison
 adiv <- data.frame(
   "Shannon" = phyloseq::estimate_richness(sig, measures = "Shannon"),
-  "MF" = phyloseq::sample_data(sig)$Male.Female, 
-  "batch" = phyloseq::sample_data(sig)$Run
+  "MF" = phyloseq::sample_data(sig)$Male.Female,
+  "batch" = phyloseq::sample_data(sig)$Batch,
+  "run" = phyloseq::sample_data(sig)$Run,
+  "aff" = phyloseq::sample_data(sig)$affiliation, 
+  "type" = phyloseq::sample_data(sig)$Conventional.Organic
 )
 
-# test variance
-# Male Female 
-varMF <- var.test(Shannon ~ MF, data = adiv, 
-                  alternative = "two.sided")
-varMF # p = 0.52, not sig
-
 # # male female
-wtestMF <- lm(Shannon ~ MF + run + batch + MF*run*batch, data = adiv)
-summary(wtestMF) # p = 0.91, ns
+model <- lm(Shannon ~ type + run + batch + aff, data = adiv)
+residuals <- resid(model)
+
+res <- as.data.frame(residuals)
+res <- rownames_to_column(res, "samp")
+
+adiv <- rownames_to_column(adiv, "samp")
+dat1 <- merge(adiv, res, by = "samp")
+
+dat1 <- column_to_rownames(dat1, "samp")
+
+model2 <- lm(residuals ~ MF, data = dat1)
+summary(model2) # P = 0.057, ns
 
 
 # violin plot 
@@ -96,27 +103,32 @@ ps.meta$Shannon <- phyloseq::estimate_richness(sig, measures = "Shannon")
 ps.meta$'' <- alpha(sig, index = 'shannon')
 
 B <- ggviolin(ps.meta, x = "Male.Female", y = "Shannon$Shannon",
-              add = "boxplot", fill = "Group", palette = c("#367aa1", "#def4e5"), title = "B", ylab = "Shannon's Diversity Index", xlab = " ") +
+              add = "boxplot", fill = "Male.Female", palette = c("#367aa1", "#def4e5"), title = "B", ylab = "Shannon's Diversity Index", xlab = " ") +
   theme(legend.position = "none") +
   theme(text = element_text(size = 15), axis.title = element_text(size = 15)) +
   scale_y_continuous(limits = c(1, 7))
 B
 
 # beta diversity (C) ----
-# transform to relative abundance
-psrel <- microbiome::transform(sig, "compositional")
 
-# clr transform
-transps <- psrel %>% 
-  tax_transform(trans = "clr") %>% 
-  ps_get()
+ait <- sig %>%
+  # transform to relative abundance
+  tax_transform("compositional", keep_counts = FALSE) %>%
+  dist_calc("aitchison")
 
-# create distance matrix 
-dist_mat <- phyloseq::distance(transps, method = "euclidean")
 
-# test
-vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Male.Female*phyloseq::sample_data(transps)$Batch) # R2 = 0.021, F(1,70) = 1.49, P = 0.006**
+# test beta dispersion
+ait %>% dist_bdisp(variables = "Male.Female") %>% bdisp_get() # p=0.181
 
+# test with PERMANOVA
+mod1 <- ait %>%
+  dist_permanova(
+    seed = 81299,
+    variables = "Male.Female + Run + Batch + affiliation + Conventional.Organic",
+    n_perms = 9999
+  )
+
+mod1 # R2 = 0.02, F(1, 65) = 1.16, P = 0.08
 # plot
 
 C <- psrel %>% 
@@ -129,7 +141,7 @@ C <- psrel %>%
   theme_classic() +
   labs(color = "Gender") +
   ggtitle("C") + 
-  labs(caption = "R2 = 0.021, F(1,70) = 1.49, P = 0.006**") +
+  labs(caption = "R2 = 0.02, F(1, 65) = 1.16, P = 0.08") +
   theme(text = element_text(size = 15)) 
 C
 

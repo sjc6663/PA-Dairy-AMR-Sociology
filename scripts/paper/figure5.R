@@ -18,20 +18,19 @@ library(dplyr)
 library(car)
 library(misty)
 library(vegan)
+library(tibble)
 
 set.seed(81299)
 
 # read in phyloseq object
 ps <- readRDS("data/full-run/decontam-ps.RDS")
 
-ps2 <- rarefy_even_depth(ps)
-
 # fix metadata for aesthetics
-sample_data(ps2)$employees <- gsub(sample_data(ps2)$employees, pattern = "No", replacement = "Family")
-sample_data(ps2)$employees <- gsub(sample_data(ps2)$employees, pattern = "Yes", replacement = "Non-Family")
+sample_data(ps)$employees <- gsub(sample_data(ps)$employees, pattern = "No", replacement = "Family")
+sample_data(ps)$employees <- gsub(sample_data(ps)$employees, pattern = "Yes", replacement = "Non-Family")
 
 # transform to relative abundance
-psrel <- microbiome::transform(ps2, "compositional")
+psrel <- microbiome::transform(ps, "compositional")
 
 # relative abundance ----
 psbclass <- aggregate_taxa(psrel, level = "Broadclass")
@@ -49,47 +48,81 @@ A <- psbclass %>% plot_composition(average_by = "employees", sample.sort = "empl
   scale_x_discrete(guide = guide_axis(angle = 0)) +
   ggtitle("A")
 
+# relative abundance plot percentages ----
+# merge samples by comparative categories (metadata) we want
+mps <- merge_samples(psrel, "employees")
+
+# create a dataframe with the aggregated abundances for desired tax rank
+phy <- mps %>% tax_glom(taxrank = "Broadclass") %>% transform_sample_counts(function(x) {x/sum(x)}) %>% psmelt()
+
+# select only relevant columns
+phy <- select(phy, c("Sample", "Broadclass", "Abundance"))
+
+# get abundance as a percent and round to whole numbers
+phy$percent <- phy$Abundance * 100
+phy$percent <- round(phy$percent, digits = 0)
+
+phy <- select(phy, "Sample", "Broadclass", "percent")
+
+phy
+
 # alpha diversity ----
 adiv <- data.frame(
-  "Shannon" = phyloseq::estimate_richness(ps2, measures = "Shannon"),
-  "employees" = phyloseq::sample_data(ps2)$employees,
-  "batch" = phyloseq::sample_data(ps2)$Batch,
-  "run" = phyloseq::sample_data(ps2)$Run,
-  "aff" = phyloseq::sample_data(ps2)$affiliation
+  "Shannon" = phyloseq::estimate_richness(ps, measures = "Shannon"),
+  "employees" = phyloseq::sample_data(ps)$employees,
+  "batch" = phyloseq::sample_data(ps)$Batch,
+  "run" = phyloseq::sample_data(ps)$Run,
+  "aff" = phyloseq::sample_data(ps)$affiliation,
+  "type" = phyloseq::sample_data(ps)$Conventional.Organic
 )
 
-# test variance
-varMF <- var.test(Shannon ~ employees, data = adiv, 
-                  alternative = "two.sided")
-varMF # p = 0.83, ns
-
 # statistical test
-model <- lm(Shannon ~ employees + run + batch + aff + employees*run*batch*aff, data = adiv)
-summary(model) # p = 0.51, ns
+model <- lm(Shannon ~ run + batch + aff + type, data = adiv)
+residuals <- resid(model)
+
+res <- as.data.frame(residuals)
+res <- rownames_to_column(res, "samp")
+
+adiv <- rownames_to_column(adiv, "samp")
+dat1 <- merge(adiv, res, by = "samp")
+
+dat1 <- column_to_rownames(dat1, "samp")
+
+model2 <- lm(residuals ~ employees, data = dat1)
+summary(model2) # P = 0.51, ns
 
 # violin plot
-ps.meta <- meta(ps2)
-ps.meta$Shannon <- phyloseq::estimate_richness(ps2, measures = "Shannon")
+ps.meta <- meta(ps)
+ps.meta$Shannon <- phyloseq::estimate_richness(ps, measures = "Shannon")
 
-ps.meta$'' <- alpha(ps2, index = 'shannon')
+ps.meta$'' <- alpha(ps, index = 'shannon')
 
 B <- ggviolin(ps.meta, x = "employees", y = "Shannon$Shannon",
               add = "boxplot", fill = "employees", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = " ") +
   theme(legend.position = "none") +
   theme(text = element_text(size = 20), axis.title = element_text(size = 20)) +
-  scale_y_continuous(limits = c(1, 6))
+  scale_y_continuous(limits = c(1, 7))
 
 # beta diversity ----
 
-# clr transform phyloseq objects
-transps <- psrel %>% 
-  tax_transform(trans = "clr") %>% 
-  ps_get()
+ait <- ps %>%
+  # transform to relative abundance
+  tax_transform("compositional", keep_counts = FALSE) %>%
+  dist_calc("aitchison")
 
-dist_mat <- phyloseq::distance(transps, method = "euclidean")
 
-vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$employees*phyloseq::sample_data(transps)$Run*phyloseq::sample_data(transps)$Batch*phyloseq::sample_data(transps)$affiliation)
-# R2 = 0.02, F(1, 57) = 1.27, P = 0.036*
+# test beta dispersion
+ait %>% dist_bdisp(variables = "employees") %>% bdisp_get() # p=0.764
+
+# test with PERMANOVA
+mod1 <- ait %>%
+  dist_permanova(
+    seed = 81299,
+    variables = "employees + Run + Batch + affiliation + Conventional.Organic",
+    n_perms = 9999
+  )
+
+mod1 # R2 = 0.01, F(1, 65) = 0.93, P = 0.73
 
 C <- psrel %>% 
   # when no distance matrix or constraints are supplied, PCA is the default/auto ordination method
@@ -101,9 +134,10 @@ C <- psrel %>%
   theme_classic() +
   labs(color = "Employee Status") +
   ggtitle("C") + 
-  labs(caption = "R2 = 0.02, F(1, 57) = 1.27, P = 0.036*") +
+  labs(caption = "R2 = 0.01, F(1, 65) = 0.93, P = 0.73") +
   theme(text = element_text(size = 20)) 
 
 (A|B)/C
+A|B
 
-ggsave(filename = "plots/paper/figure5.pdf", dpi = 600, width = 20, height = 18)
+ggsave(filename = "plots/paper/figure5.pdf", dpi = 600, width = 22, height = 14)

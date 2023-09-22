@@ -18,16 +18,15 @@ library(dplyr)
 library(car)
 library(misty)
 library(vegan)
+library(tibble)
 
 set.seed(81299)
 
 # read in phyloseq object
 ps <- readRDS("data/full-run/decontam-ps.RDS")
 
-ps2 <- rarefy_even_depth(ps)
-
 # transform to relative abundance
-psrel <- microbiome::transform(ps2, "compositional")
+psrel <- microbiome::transform(ps, "compositional")
 
 # relative abundance ----
 psbclass <- aggregate_taxa(psrel, level = "Broadclass")
@@ -45,47 +44,81 @@ A <- psbclass %>% plot_composition(average_by = "Cultural.Language.Barriers", sa
   scale_x_discrete(guide = guide_axis(angle = 0)) +
   ggtitle("A")
 
+# relative abundance plot percentages ----
+# merge samples by comparative categories (metadata) we want
+mps <- merge_samples(psrel, "Cultural.Language.Barriers")
+
+# create a dataframe with the aggregated abundances for desired tax rank
+phy <- mps %>% tax_glom(taxrank = "Broadclass") %>% transform_sample_counts(function(x) {x/sum(x)}) %>% psmelt()
+
+# select only relevant columns
+phy <- select(phy, c("Sample", "Broadclass", "Abundance"))
+
+# get abundance as a percent and round to whole numbers
+phy$percent <- phy$Abundance * 100
+phy$percent <- round(phy$percent, digits = 0)
+
+phy <- select(phy, "Sample", "Broadclass", "percent")
+
+phy
+
 # alpha diversity ----
 adiv <- data.frame(
-  "Shannon" = phyloseq::estimate_richness(ps2, measures = "Shannon"),
-  "lang" = phyloseq::sample_data(ps2)$Cultural.Language.Barriers,
-  "batch" = phyloseq::sample_data(ps2)$Batch,
-  "run" = phyloseq::sample_data(ps2)$Run,
-  "aff" = phyloseq::sample_data(ps2)$affiliation
+  "Shannon" = phyloseq::estimate_richness(ps, measures = "Shannon"),
+  "lang" = phyloseq::sample_data(ps)$Cultural.Language.Barriers,
+  "batch" = phyloseq::sample_data(ps)$Batch,
+  "run" = phyloseq::sample_data(ps)$Run,
+  "aff" = phyloseq::sample_data(ps)$affiliation,
+  "type" = phyloseq::sample_data(ps)$Conventional.Organic
 )
 
-# test variance
-varMF <- var.test(Shannon ~ lang, data = adiv, 
-                  alternative = "two.sided")
-varMF # p = 0.75, ns
-
 # statistical test
-model <- lm(Shannon ~ lang + run + batch + aff + lang*run*batch*aff, data = adiv)
-summary(model) # p = 0.24, ns
+model <- lm(Shannon ~ run + batch + aff + type, data = adiv)
+residuals <- resid(model)
+
+res <- as.data.frame(residuals)
+res <- rownames_to_column(res, "samp")
+
+adiv <- rownames_to_column(adiv, "samp")
+dat1 <- merge(adiv, res, by = "samp")
+
+dat1 <- column_to_rownames(dat1, "samp")
+
+model2 <- lm(residuals ~ lang, data = dat1)
+summary(model2) # P = 0.42, ns
 
 # violin plot
-ps.meta <- meta(ps2)
-ps.meta$Shannon <- phyloseq::estimate_richness(ps2, measures = "Shannon")
+ps.meta <- meta(ps)
+ps.meta$Shannon <- phyloseq::estimate_richness(ps, measures = "Shannon")
 
-ps.meta$'' <- alpha(ps2, index = 'shannon')
+ps.meta$'' <- alpha(ps, index = 'shannon')
 
 B <- ggviolin(ps.meta, x = "Cultural.Language.Barriers", y = "Shannon$Shannon",
               add = "boxplot", fill = "Cultural.Language.Barriers", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = " ") +
   theme(legend.position = "none") +
   theme(text = element_text(size = 20), axis.title = element_text(size = 20)) +
-  scale_y_continuous(limits = c(1, 6))
+  scale_y_continuous(limits = c(1, 7))
 
 # beta diversity ----
 
-# clr transform phyloseq objects
-transps <- psrel %>% 
-  tax_transform(trans = "clr") %>% 
-  ps_get()
+ait <- ps %>%
+  # transform to relative abundance
+  tax_transform("compositional", keep_counts = FALSE) %>%
+  dist_calc("aitchison")
 
-dist_mat <- phyloseq::distance(transps, method = "euclidean")
 
-vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Cultural.Language.Barriers*phyloseq::sample_data(transps)$Run*phyloseq::sample_data(transps)$Batch*phyloseq::sample_data(transps)$affiliation)
-# R2 = 0.01, F(1, 59) = 1.02, P = 0.35
+# test beta dispersion
+ait %>% dist_bdisp(variables = "Cultural.Language.Barriers") %>% bdisp_get() # p=0.165
+
+# test with PERMANOVA
+mod1 <- ait %>%
+  dist_permanova(
+    seed = 81299,
+    variables = "Cultural.Language.Barriers + Run + Batch + affiliation + Conventional.Organic",
+    n_perms = 9999
+  )
+
+mod1 # R2 = 0.01, F(1, 65) = 0.80, P = 0.99
 
 C <- psrel %>% 
   # when no distance matrix or constraints are supplied, PCA is the default/auto ordination method
@@ -97,9 +130,11 @@ C <- psrel %>%
   theme_classic() +
   labs(color = "Language Barriers") +
   ggtitle("C") + 
-  labs(caption = "R2 = 0.01, F(1, 59) = 1.02, P = 0.35") +
+  labs(caption = "R2 = 0.01, F(1, 65) = 0.80, P = 0.99") +
   theme(text = element_text(size = 20)) 
 
 (A|B)/C
 
-ggsave(filename = "plots/paper/figure6.pdf", dpi = 600, width = 20, height = 18)
+A|B
+
+ggsave(filename = "plots/paper/figure6.pdf", dpi = 600, width = 20, height = 14)

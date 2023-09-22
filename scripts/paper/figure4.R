@@ -18,16 +18,15 @@ library(dplyr)
 library(car)
 library(misty)
 library(vegan)
+library(tibble)
 
 set.seed(81299)
 
 # read in phyloseq object
 ps <- readRDS("data/full-run/decontam-ps.RDS")
 
-ps2 <- rarefy_even_depth(ps)
-
 # transform to relative abundance
-psrel <- microbiome::transform(ps2, "compositional")
+psrel <- microbiome::transform(ps, "compositional")
 
 # relative abundance ----
 psbclass <- aggregate_taxa(psrel, level = "Broadclass")
@@ -45,48 +44,82 @@ A <- psbclass %>% plot_composition(average_by = "Group", sample.sort = "Group", 
   scale_x_discrete(guide = guide_axis(angle = 0)) +
   ggtitle("A")
 
+# relative abundance plot percentages ----
+# merge samples by comparative categories (metadata) we want
+mps <- merge_samples(psrel, "Group")
+
+# create a dataframe with the aggregated abundances for desired tax rank
+phy <- mps %>% tax_glom(taxrank = "Broadclass") %>% transform_sample_counts(function(x) {x/sum(x)}) %>% psmelt()
+
+# select only relevant columns
+phy <- select(phy, c("Sample", "Broadclass", "Abundance"))
+
+# get abundance as a percent and round to whole numbers
+phy$percent <- phy$Abundance * 100
+phy$percent <- round(phy$percent, digits = 0)
+
+phy <- select(phy, "Sample", "Broadclass", "percent")
+
+phy
+
 # alpha diversity ----
 adiv <- data.frame(
-  "Shannon" = phyloseq::estimate_richness(ps2, measures = "Shannon"),
-  "age" = phyloseq::sample_data(ps2)$Group,
-  "batch" = phyloseq::sample_data(ps2)$Batch,
-  "run" = phyloseq::sample_data(ps2)$Run,
-  "aff" = phyloseq::sample_data(ps2)$affiliation
+  "Shannon" = phyloseq::estimate_richness(ps, measures = "Shannon"),
+  "age" = phyloseq::sample_data(ps)$Group,
+  "batch" = phyloseq::sample_data(ps)$Batch,
+  "run" = phyloseq::sample_data(ps)$Run,
+  "aff" = phyloseq::sample_data(ps)$affiliation,
+  "type" = phyloseq::sample_data(ps)$Conventional.Organic
 )
 
-# test variance
-varMF <- var.test(Shannon ~ age, data = adiv, 
-                  alternative = "two.sided")
-varMF # p = 0.001, SIGNIFICANT
 
 # statistical test
-model <- lm(Shannon ~ age + run + batch + aff + age*run*batch*aff, data = adiv)
-summary(model) # p = 0.70, ns
+model <- lm(Shannon ~ run + batch + aff + type, data = adiv)
+residuals <- resid(model)
+
+res <- as.data.frame(residuals)
+res <- rownames_to_column(res, "samp")
+
+adiv <- rownames_to_column(adiv, "samp")
+dat1 <- merge(adiv, res, by = "samp")
+
+dat1 <- column_to_rownames(dat1, "samp")
+
+model2 <- lm(residuals ~ age, data = dat1)
+summary(model2) # P = 0.0044**
 
 # violin plot
-ps.meta <- meta(ps2)
-ps.meta$Shannon <- phyloseq::estimate_richness(ps2, measures = "Shannon")
+ps.meta <- meta(ps)
+ps.meta$Shannon <- phyloseq::estimate_richness(ps, measures = "Shannon")
 
-ps.meta$'' <- alpha(ps2, index = 'shannon')
+ps.meta$'' <- alpha(ps, index = 'shannon')
 
 B <- ggviolin(ps.meta, x = "Group", y = "Shannon$Shannon",
               add = "boxplot", fill = "Group", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = " ") +
   theme(legend.position = "none") +
   theme(text = element_text(size = 20), axis.title = element_text(size = 20)) +
-  scale_y_continuous(limits = c(1, 6))
+  scale_y_continuous(limits = c(1, 7))
 
 # beta diversity ----
 
-# clr transform phyloseq objects
-transps <- psrel %>% 
-  tax_transform(trans = "clr") %>% 
-  ps_get()
+ait <- ps %>%
+  # transform to relative abundance
+  tax_transform("compositional", keep_counts = FALSE) %>%
+  dist_calc("aitchison")
 
-dist_mat <- phyloseq::distance(transps, method = "euclidean")
 
-vegan::adonis2(dist_mat ~ phyloseq::sample_data(transps)$Group*phyloseq::sample_data(transps)$Run*phyloseq::sample_data(transps)$Batch*phyloseq::sample_data(transps)$affiliation)
-# signficance between group and affiliation - P = 0.021 ----- does this mean we stop here and cant say there's a difference in age because we are seeing an interaction by affiliation?
-# R2 = 0.03, F(1, 53) = 2.50, P = 0.001**
+# test beta dispersion
+ait %>% dist_bdisp(variables = "Group") %>% bdisp_get() # p=0.105
+
+# test with PERMANOVA
+mod1 <- ait %>%
+  dist_permanova(
+    seed = 81299,
+    variables = "Group + Run + Batch + affiliation + Conventional.Organic",
+    n_perms = 9999
+  )
+
+mod1 # R2 = 0.03, F(1, 65) = 1.88, P = 0.0001***
 
 C <- psrel %>% 
   # when no distance matrix or constraints are supplied, PCA is the default/auto ordination method
@@ -98,9 +131,9 @@ C <- psrel %>%
   theme_classic() +
   labs(color = "Age Group") +
   ggtitle("C") + 
-  labs(caption = "R2 = 0.03, F(1, 53) = 2.50, P = 0.001**") +
+  labs(caption = "R2 = 0.03, F(1, 65) = 1.88, P = 0.0001***") +
   theme(text = element_text(size = 20)) 
 
 (A|B)/C
 
-ggsave(filename = "plots/paper/figure4.pdf", dpi = 600, width = 20, height = 18)
+ggsave(filename = "plots/paper/figure4.pdf", dpi = 600, width = 22, height = 16)
