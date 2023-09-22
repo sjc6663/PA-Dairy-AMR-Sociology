@@ -22,7 +22,7 @@ ps <- readRDS("data/full-run/decontam-ps.RDS")
 tax <- as.data.frame(ps@tax_table)
 
 tax <- tax %>% 
-  select(Gene)
+  dplyr::select(Gene)
 
 colnames(gene) <- c("Gene")
 
@@ -30,7 +30,7 @@ tax$sig <- tax$Gene %in% gene$Gene
 
 tax <- rownames_to_column(tax, "gene2")
 
-tax <- select(tax, Gene, sig)
+tax <- dplyr::select(tax, Gene, sig)
 
 tax <- as.data.frame(tax)
 
@@ -48,7 +48,6 @@ taxtab <- phyloseq::tax_table(tax5)
 taxa_names(taxtab)
 
 tax_table(ps) <- phyloseq(tax_table(taxtab))
-p2 <- ps
 
 tax_table(ps)
 

@@ -4,31 +4,28 @@ set.seed(81299)
 # read in phyloseq object
 ps <- readRDS("data/full-run/decontam-ps.RDS")
 
-ps2 <- rarefy_even_depth(ps)
-
 # alpha diversity ----
 adiv <- data.frame(
-  "Shannon" = phyloseq::estimate_richness(ps2, measures = "Shannon"),
-  "MF" = phyloseq::sample_data(ps2)$Male.Female,
-  "batch" = phyloseq::sample_data(ps2)$Batch,
-  "run" = phyloseq::sample_data(ps2)$Run,
-  "aff" = phyloseq::sample_data(ps2)$affiliation,
-  "type" = phyloseq::sample_data(ps2)$Conventional.Organic
+  "Shannon" = phyloseq::estimate_richness(ps, measures = "Shannon"),
+  "MF" = phyloseq::sample_data(ps)$Male.Female,
+  "batch" = phyloseq::sample_data(ps)$Batch,
+  "run" = phyloseq::sample_data(ps)$Run,
+  "aff" = phyloseq::sample_data(ps)$affiliation, 
+  "type" = phyloseq::sample_data(ps)$Conventional.Organic
 )
 
-# test variance
-varMF <- var.test(Shannon ~ MF, data = adiv, 
-                  alternative = "two.sided")
-varMF # p = 0.5, ns
 
-# statistical test - WHERE WE ARE HAVING THE ISSUE/QUESTION
+# get residuals
+model <- lm(Shannon ~ aff + run + batch + type, data = adiv)
+residuals <- resid(model)
 
-# what I was running (t-test with assumed unequal variances): 
-wtestMF <- t.test(Shannon ~ MF, data = adiv, var.equal = FALSE)
-wtestMF # p = 0.0007**, SIGNIFICANT
+res <- as.data.frame(residuals)
+res <- rownames_to_column(res, "samp")
 
-# what I think we need to change it to to account for run, batch, relgious affiliation, and farm production type:
-model <- lm(Shannon ~ MF + run + batch + aff + type + MF*run*batch*aff*type, data = adiv)
-out <- summary(model) 
-# significance at MFMale:affEnglish (P = 0.02*)
-# MFMale, p = 0.70, ns
+adiv <- rownames_to_column(adiv, "samp")
+dat1 <- merge(adiv, res, by = "samp")
+
+dat1 <- column_to_rownames(dat1, "samp")
+
+model2 <- lm(residuals ~ MF, data = dat1)
+summary(model2) # P = 0.0216*
