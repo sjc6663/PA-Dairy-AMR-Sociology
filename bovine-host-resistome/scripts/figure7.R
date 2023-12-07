@@ -136,7 +136,7 @@ C <- psrel %>%
   tax_transform(trans = "clr") %>%
   ord_calc(method = "PCA") %>% 
   ord_plot(color = "Male.Female", size = 6, axes = c(2,3)) +
-  scale_color_manual(values = c("#367aa1", "#def4e5")) +
+  scale_color_manual(values = c("#def4e5", "#367aa1")) +
   stat_ellipse(aes(group = Male.Female, color = Male.Female)) + 
   theme_classic() +
   labs(color = "Gender") +

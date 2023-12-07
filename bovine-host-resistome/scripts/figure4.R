@@ -126,7 +126,7 @@ C <- psrel %>%
   tax_transform(trans = "clr") %>%
   ord_calc(method = "PCA") %>% 
   ord_plot(color = "Group", size = 6, axes = c(1,2)) +
-  scale_color_manual(values = c("#40498d", "#38aaac")) +
+  scale_color_manual(values = c("#38aaac", "#40498d")) +
   stat_ellipse(aes(group = Group, color = Group)) + 
   theme_classic() +
   labs(color = "Age Group") +
