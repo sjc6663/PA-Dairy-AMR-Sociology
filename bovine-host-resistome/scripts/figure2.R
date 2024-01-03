@@ -67,7 +67,7 @@ C <- calves %>% plot_composition(average_by = "Farm", sample.sort = "Conventiona
   theme(legend.position = "none") +
   labs(x = " ", fill=' ') +
   scale_x_discrete(guide = guide_axis(angle = 90)) +
-  ggtitle("C")
+  ggtitle("A")
 
 D <- cows %>% plot_composition(average_by = "Farm", sample.sort = "Conventional.Organic", x.label = "Farm", group_by = "Conventional.Organic") +
   # change y axis to be percentages instead of numbers
@@ -77,7 +77,7 @@ D <- cows %>% plot_composition(average_by = "Farm", sample.sort = "Conventional.
   theme(legend.position = "none") +
   labs(x = " ", fill=' ') +
   scale_x_discrete(guide = guide_axis(angle = 90)) +
-  ggtitle("D")
+  ggtitle("B")
 
 legend <- cows %>% plot_composition(average_by = "Farm", sample.sort = "Conventional.Organic", x.label = "Farm", group_by = "Conventional.Organic") +
   # change y axis to be percentages instead of numbers
@@ -113,7 +113,7 @@ extract_legend <- function(my_ggp) {
 shared_legend <- extract_legend(legend)
 
 # Draw plots with shared legend
-all <- grid.arrange(arrangeGrob(A, B, C, D, ncol = 2, nrow = 2),
+all <- grid.arrange(arrangeGrob(C, D, ncol = 1, nrow = 2),
                     shared_legend, nrow = 2, heights = c(10, 1))
 
 ggsave(all, filename = "plots/paper/figure2.pdf", dpi = 600, width = 24, height = 20)
