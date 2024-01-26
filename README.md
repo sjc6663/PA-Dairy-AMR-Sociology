@@ -11,8 +11,14 @@ This repository includes scripts related to analyzing that data. Analysis was do
 
 ## Scripts
 
-### Bash Scripts
+### bash scripts folder
 These bash scripts are used on the raw data to run the samples through AMRPlusPlus in Penn State's Roar Collab Super Computer. Slight modification can be performed to fit the job to any linux based system. 
+
+### merge-outputs.R
+This script is used to generate the batches of output data from AMRPlusPlus into one matrix gene file and one matrix count file to import into phyloseq.
+
+### create-phyloseq.R
+
 
 ### figure2.R
 This script is used for the generation of bar plots for cows and calves separating the samples by farm and Broadclass of AMR genes. 
