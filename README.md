@@ -17,8 +17,11 @@ These bash scripts are used on the raw data to run the samples through AMRPlusPl
 ### merge-outputs.R
 This script is used to generate the batches of output data from AMRPlusPlus into one matrix gene file and one matrix count file to import into phyloseq.
 
-### create-phyloseq.R
+### generate-phyloseq.R
+This script is used to take the count matrix, gene info matrix, and metadata to generate a single phyloseq object that can be used to manipulate data for downstream analysis. 
 
+### decontam.R
+This script utilizes the decontam R package to remove contaminant genes based on the Positive and Negative Control samples sequenced and put through the AMRPlusPlus pipeline.
 
 ### figure2.R
 This script is used for the generation of bar plots for cows and calves separating the samples by farm and Broadclass of AMR genes. 
