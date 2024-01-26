@@ -5,3 +5,6 @@ This data is from Pennsylvania Dairy Farms and is related to the antimicrobial r
 This repository includes scripts related to analyzing that data. Analysis was done using AMR++ for gene alignment and downstream analysis was completed with R in RStudio. Below is a breakdown of what each file is relevant for related to analysis. 
 
 
+## Data
+
+### Phyloseq 
