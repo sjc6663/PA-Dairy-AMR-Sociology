@@ -1,4 +1,4 @@
-d# Analysis of Whole Genome Sequencing (Shotgun Metagenomics) Data
+# Analysis of Whole Genome Sequencing (Shotgun Metagenomics) Data
 
 This data is from Pennsylvania Dairy Farms and is related to the antimicrobial resistance genes found on those farms and thier relationship to sociological factors associated with the farm and farm operator/manager for a paper titled "*Exploring the Relevance of Gender in Agriculture for Antimicrobial Resistance: A Case Study of PA Dairy Farms*."
 
@@ -7,7 +7,10 @@ This repository includes scripts related to analyzing that data. Analysis was do
 
 ## Data
 
-### Phyloseq 
+### CIA_genes.csv
+This file lists all of the clinically signficant genes selected based on the WHO list of clinically significant antimicrobial classes. 
+
+
 
 ## Scripts
 
@@ -24,7 +27,7 @@ This script is used to take the count matrix, gene info matrix, and metadata to 
 This script utilizes the decontam R package to remove contaminant genes based on the Positive and Negative Control samples sequenced and put through the AMRPlusPlus pipeline.
 
 ### sig-ps-creation.R
-This script is used to combine the Clinically Significant Genes csv file (CIA-genes.csv) with the phyloseq object to only select genes that are deemed clinically significant for downstream analysis. 
+This script is used to combine the Clinically Significant Genes csv file (CIA_genes.csv) with the phyloseq object to only select genes that are deemed clinically significant for downstream analysis. 
 
 ### figure2.R
 This script is used for the generation of bar plots for cows and calves separating the samples by farm and Broadclass of AMR genes. 
