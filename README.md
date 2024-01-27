@@ -10,7 +10,20 @@ This repository includes scripts related to analyzing that data. Analysis was do
 ### CIA_genes.csv
 This file lists all of the clinically signficant genes selected based on the WHO list of clinically significant antimicrobial classes. 
 
+### PADairy-AMR-Metadata.xlsx
+This is the metadata file with anonymous survey results for the study. 
 
+### countmatrix-cleanedall.txt
+This is the count table for gene counts for all samples. This is used to fill the "otu_table" slot in the phyloseq object.
+
+### geneinfo-all.txt
+This is the gene table for all gene information for all samples. This is used to fill the "tax_table" slot in the phyloseq object. 
+
+### decontam-ps.rds
+This is the decontaminated phyloseq object. 
+
+### sig-decontam-ps.rds
+This is the decontaminated phyloseq object only containing information for the clinically significant genes. 
 
 ## Scripts
 
