@@ -25,6 +25,9 @@ set.seed(81299)
 # read in phyloseq object
 ps <- readRDS("bovine-host-resistome/decontam-ps.RDS")
 
+ps <- subset_samples(ps,
+                     Conventional.Organic == "Conventional")
+
 # fix metadata for aesthetics
 sample_data(ps)$employees <- gsub(sample_data(ps)$employees, pattern = "No", replacement = "Family")
 sample_data(ps)$employees <- gsub(sample_data(ps)$employees, pattern = "Yes", replacement = "Non-Family")
@@ -77,7 +80,7 @@ adiv <- data.frame(
 )
 
 # statistical test
-model <- lm(Shannon ~ run + batch + aff + type, data = adiv)
+model <- lm(Shannon ~ run + batch, data = adiv)
 residuals <- resid(model)
 
 res <- as.data.frame(residuals)
@@ -89,7 +92,7 @@ dat1 <- merge(adiv, res, by = "samp")
 dat1 <- column_to_rownames(dat1, "samp")
 
 model2 <- lm(residuals ~ employees, data = dat1)
-summary(model2) # P = 0.87, ns
+summary(model2) # P = 0.95, ns
 
 # violin plot
 ps.meta <- meta(ps)
@@ -112,17 +115,17 @@ ait <- ps %>%
 
 
 # test beta dispersion
-ait %>% dist_bdisp(variables = "employees") %>% bdisp_get() # p=0.56
+ait %>% dist_bdisp(variables = "employees") %>% bdisp_get() # p=0.49
 
 # test with PERMANOVA
 mod1 <- ait %>%
   dist_permanova(
     seed = 81299,
-    variables = "employees + Run + Batch + affiliation + Conventional.Organic",
+    variables = "employees + Run + Batch",
     n_perms = 9999
   )
 
-mod1 # R2 = 0.009, F(1, 65) = 0.65, P = 0.95
+mod1 # R2 = 0.03, F(1, 24) = 0.77, P = 0.78
 
 C <- psrel %>% 
   # when no distance matrix or constraints are supplied, PCA is the default/auto ordination method
