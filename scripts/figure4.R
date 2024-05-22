@@ -25,6 +25,9 @@ set.seed(81299)
 # read in phyloseq object
 ps <- readRDS("bovine-host-resistome/decontam-ps.RDS")
 
+ps <- subset_samples(ps,
+                     Conventional.Organic == "Conventional")
+
 # transform to relative abundance
 psrel <- microbiome::transform(ps, "compositional")
 
@@ -74,7 +77,7 @@ adiv <- data.frame(
 
 
 # statistical test
-model <- lm(Shannon ~ run + batch + aff + type, data = adiv)
+model <- lm(Shannon ~ run + batch, data = adiv)
 residuals <- resid(model)
 
 res <- as.data.frame(residuals)
@@ -86,7 +89,7 @@ dat1 <- merge(adiv, res, by = "samp")
 dat1 <- column_to_rownames(dat1, "samp")
 
 model2 <- lm(residuals ~ age, data = dat1)
-summary(model2) # P = 1.35e-06
+summary(model2) # P = 7.77e-06
 
 # violin plot
 ps.meta <- meta(ps)
@@ -109,17 +112,17 @@ ait <- ps %>%
 
 
 # test beta dispersion
-ait %>% dist_bdisp(variables = "Group") %>% bdisp_get() # p=0.022*
+ait %>% dist_bdisp(variables = "Group") %>% bdisp_get() # p=0.011*
 
 # test with PERMANOVA
 mod1 <- ait %>%
   dist_permanova(
     seed = 81299,
-    variables = "Group + Run + Batch + affiliation + Conventional.Organic",
+    variables = "Group + Run + Batch",
     n_perms = 9999
   )
 
-mod1 # R2 = 0.05, F(1, 65) = 3.95, P = 0.0001***
+mod1 # R2 = 0.11, F(1, 24) = 3.05, P = 0.0001***
 
 C <- psrel %>% 
   # when no distance matrix or constraints are supplied, PCA is the default/auto ordination method
