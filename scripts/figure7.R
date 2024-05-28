@@ -32,6 +32,9 @@ ps2 <- readRDS("bovine-host-resistome/sig-decontam-ps.RDS")
 sig <- subset_taxa(ps2, 
                    sig == "TRUE")
 
+sig <- subset_samples(sig, 
+                   Conventional.Organic == "Conventional")
+
 # barplot (A) ----
 psrel <- microbiome::transform(sig, "compositional")
 
@@ -81,7 +84,7 @@ adiv <- data.frame(
 )
 
 # # male female
-model <- lm(Shannon ~ type + run + batch + aff, data = adiv)
+model <- lm(Shannon ~ run + batch, data = adiv)
 residuals <- resid(model)
 
 res <- as.data.frame(residuals)
@@ -93,7 +96,7 @@ dat1 <- merge(adiv, res, by = "samp")
 dat1 <- column_to_rownames(dat1, "samp")
 
 model2 <- lm(residuals ~ MF, data = dat1)
-summary(model2) # P = 0.34, ns
+summary(model2) # P = 0.00
 
 
 # violin plot 
@@ -118,13 +121,13 @@ ait <- sig %>%
 
 
 # test beta dispersion
-ait %>% dist_bdisp(variables = "Male.Female") %>% bdisp_get() # p=0.59
+ait %>% dist_bdisp(variables = "Male.Female") %>% bdisp_get() # p=0.00015
 
 # test with PERMANOVA
 mod1 <- ait %>%
   dist_permanova(
     seed = 81299,
-    variables = "Male.Female + Run + Batch + affiliation + Conventional.Organic",
+    variables = "Male.Female + Run + Batch",
     n_perms = 9999
   )
 
