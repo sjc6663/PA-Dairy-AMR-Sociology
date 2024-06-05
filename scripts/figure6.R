@@ -38,8 +38,8 @@ A <- psbclass %>% plot_composition(average_by = "Cultural.Language.Barriers", sa
   # change y axis to be percentages instead of numbers
   scale_y_continuous(labels = scales::percent) +
   scale_fill_viridis(option = "mako", discrete = TRUE) + 
-  theme(text = element_text(size = 20)) + 
-  theme(legend.position = "top") +
+  theme(text = element_text(size = 30)) + 
+  theme(legend.position = "top", legend.text = element_text(size = 20)) +
   labs(x = " ", fill=' ') +
   scale_x_discrete(guide = guide_axis(angle = 0)) +
   ggtitle("A")
@@ -85,7 +85,7 @@ dat1 <- merge(adiv, res, by = "samp")
 dat1 <- column_to_rownames(dat1, "samp")
 
 model2 <- lm(residuals ~ lang, data = dat1)
-summary(model2) # P = 0.94, ns
+summary(model2) # P = 0.49
 
 # violin plot
 ps.meta <- meta(ps)
@@ -96,7 +96,7 @@ ps.meta$'' <- alpha(ps, index = 'shannon')
 B <- ggviolin(ps.meta, x = "Cultural.Language.Barriers", y = "Shannon$Shannon",
               add = "boxplot", fill = "Cultural.Language.Barriers", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = " ") +
   theme(legend.position = "none") +
-  theme(text = element_text(size = 20), axis.title = element_text(size = 20)) +
+  theme(text = element_text(size = 30), axis.title = element_text(size = 30)) +
   scale_y_continuous(limits = c(1, 7))
 
 # beta diversity ----
@@ -108,7 +108,7 @@ ait <- ps %>%
 
 
 # test beta dispersion
-ait %>% dist_bdisp(variables = "Cultural.Language.Barriers") %>% bdisp_get() # p=0.31
+ait %>% dist_bdisp(variables = "Cultural.Language.Barriers") %>% bdisp_get() # p=0.34
 
 # test with PERMANOVA
 mod1 <- ait %>%
@@ -118,7 +118,7 @@ mod1 <- ait %>%
     n_perms = 9999
   )
 
-mod1 # R2 = 0.04, F(1, 24) = 0.94, P = 0.52
+mod1 # R2 = 0.04, F(1, 24) = 0.95, P = 0.50
 
 C <- psrel %>% 
   # when no distance matrix or constraints are supplied, PCA is the default/auto ordination method
@@ -130,11 +130,11 @@ C <- psrel %>%
   theme_classic() +
   labs(color = "Language Barriers") +
   ggtitle("C") + 
-  labs(caption = "R2 = 0.01, F(1, 65) = 0.91, P = 0.61") +
+  labs(caption = "R2 = 0.04, F(1, 24) = 0.95, P = 0.50") +
   theme(text = element_text(size = 20)) 
 
 (A|B)/C
 
 A|B
 
-ggsave(filename = "plots/paper/figure6.pdf", dpi = 600, width = 20, height = 14)
+ggsave(filename = "plots/paper/figure6.pdf", dpi = 600, width = 18, height = 14)
