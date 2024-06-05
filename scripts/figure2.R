@@ -66,7 +66,7 @@ A <- psbclass %>% plot_composition(average_by = "Farm", sample.sort = "Group", x
   # change y axis to be percentages instead of numbers
   scale_y_continuous(labels = scales::percent) +
   scale_fill_viridis(option = "mako", discrete = TRUE) + 
-  theme(text = element_text(size = 20)) + 
+  theme(text = element_text(size = 30)) + 
   theme(legend.position = "right") +
   labs(x = " ", fill=' ') +
   scale_x_discrete(guide = guide_axis(angle = 90)) 
@@ -119,5 +119,5 @@ A <- psbclass %>% plot_composition(average_by = "Farm", sample.sort = "Group", x
 # all <- grid.arrange(arrangeGrob(A, B, C, D, ncol = 2, nrow = 2),
 #                    shared_legend, nrow = 2, heights = c(10, 1))
 
-ggsave(A, filename = "plots/paper/figure2.pdf", dpi = 600, width = 24, height = 20)
+ggsave(A, filename = "plots/paper/figure2B.pdf", dpi = 600, width = 10, height = 8)
 
