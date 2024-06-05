@@ -45,8 +45,8 @@ A <- psbclass %>% plot_composition(average_by = "employees", sample.sort = "empl
   # change y axis to be percentages instead of numbers
   scale_y_continuous(labels = scales::percent) +
   scale_fill_viridis(option = "mako", discrete = TRUE) + 
-  theme(text = element_text(size = 20)) + 
-  theme(legend.position = "top") +
+  theme(text = element_text(size = 30)) + 
+  theme(legend.position = "top", legend.text = element_text(size = 20)) +
   labs(x = " ", fill=' ') +
   scale_x_discrete(guide = guide_axis(angle = 0)) +
   ggtitle("A")
@@ -103,7 +103,7 @@ ps.meta$'' <- alpha(ps, index = 'shannon')
 B <- ggviolin(ps.meta, x = "employees", y = "Shannon$Shannon",
               add = "boxplot", fill = "employees", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = " ") +
   theme(legend.position = "none") +
-  theme(text = element_text(size = 20), axis.title = element_text(size = 20)) +
+  theme(text = element_text(size = 30), axis.title = element_text(size = 30)) +
   scale_y_continuous(limits = c(1, 7))
 
 # beta diversity ----
@@ -115,7 +115,7 @@ ait <- ps %>%
 
 
 # test beta dispersion
-ait %>% dist_bdisp(variables = "employees") %>% bdisp_get() # p=0.49
+ait %>% dist_bdisp(variables = "employees") %>% bdisp_get() # p=0.59
 
 # test with PERMANOVA
 mod1 <- ait %>%
@@ -125,7 +125,7 @@ mod1 <- ait %>%
     n_perms = 9999
   )
 
-mod1 # R2 = 0.03, F(1, 24) = 0.77, P = 0.78
+mod1 # R2 = 0.03, F(1, 24) = 0.78, P = 0.75
 
 C <- psrel %>% 
   # when no distance matrix or constraints are supplied, PCA is the default/auto ordination method
@@ -137,10 +137,10 @@ C <- psrel %>%
   theme_classic() +
   labs(color = "Employee Status") +
   ggtitle("C") + 
-  labs(caption = "R2 = 0.009, F(1, 65) = 0.65, P = 0.95") +
+  labs(caption = "R2 = 0.03, F(1, 24) = 0.78, P = 0.75") +
   theme(text = element_text(size = 20)) 
 
 (A|B)/C
 A|B
 
-ggsave(filename = "plots/paper/figure5.pdf", dpi = 600, width = 22, height = 14)
+ggsave(filename = "plots/paper/figure5.pdf", dpi = 600, width = 18, height = 14)
