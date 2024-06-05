@@ -41,8 +41,8 @@ A <- psbclass %>% plot_composition(average_by = "Group", sample.sort = "Group", 
   # change y axis to be percentages instead of numbers
   scale_y_continuous(labels = scales::percent) +
   scale_fill_viridis(option = "mako", discrete = TRUE) + 
-  theme(text = element_text(size = 20)) + 
-  theme(legend.position = "top") +
+  theme(text = element_text(size = 30)) + 
+  theme(legend.position = "top", legend.text = element_text(size = 20)) +
   labs(x = " ", fill=' ') +
   scale_x_discrete(guide = guide_axis(angle = 0)) +
   ggtitle("A")
@@ -100,7 +100,7 @@ ps.meta$'' <- alpha(ps, index = 'shannon')
 B <- ggviolin(ps.meta, x = "Group", y = "Shannon$Shannon",
               add = "boxplot", fill = "Group", palette = c("#38aaac", "#40498d"), title = "B", ylab = "Shannon's Diversity Index", xlab = " ") +
   theme(legend.position = "none") +
-  theme(text = element_text(size = 20), axis.title = element_text(size = 20)) +
+  theme(text = element_text(size = 30), axis.title = element_text(size = 30)) +
   scale_y_continuous(limits = c(1, 7))
 
 # beta diversity ----
@@ -112,7 +112,7 @@ ait <- ps %>%
 
 
 # test beta dispersion
-ait %>% dist_bdisp(variables = "Group") %>% bdisp_get() # p=0.011*
+ait %>% dist_bdisp(variables = "Group") %>% bdisp_get() # p=0.013*
 
 # test with PERMANOVA
 mod1 <- ait %>%
@@ -122,7 +122,7 @@ mod1 <- ait %>%
     n_perms = 9999
   )
 
-mod1 # R2 = 0.11, F(1, 24) = 3.05, P = 0.0001***
+mod1 # R2 = 0.11, F(1, 24) = 3.22, P = 0.0001***
 
 C <- psrel %>% 
   # when no distance matrix or constraints are supplied, PCA is the default/auto ordination method
@@ -134,9 +134,9 @@ C <- psrel %>%
   theme_classic() +
   labs(color = "Age Group") +
   ggtitle("C") + 
-  labs(caption = "R2 = 0.05, F(1, 65) = 3.95, P = 0.0001***") +
-  theme(text = element_text(size = 20)) 
+  labs(caption = "R2 = 0.11, F(1, 24) = 3.22, P = 0.0001") +
+  theme(text = element_text(size = 30)) 
 
 (A|B)/C
 
-ggsave(filename = "plots/paper/figure4.pdf", dpi = 600, width = 22, height = 16)
+ggsave(filename = "plots/paper/figure4.pdf", dpi = 600, width = 20, height = 16)
