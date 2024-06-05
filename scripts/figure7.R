@@ -47,8 +47,8 @@ A <- psbclass %>% plot_composition(average_by = "Male.Female", sample.sort = "Ma
   # change y axis to be percentages instead of numbers
   scale_y_continuous(labels = scales::percent) +
   scale_fill_viridis(option = "mako", discrete = TRUE) + 
-  theme(text = element_text(size = 15)) + 
-  theme(legend.position = "top") +
+  theme(text = element_text(size = 30)) + 
+  theme(legend.position = "top", legend.text = element_text(size = 20)) +
   labs(x = " ", fill=' ') +
   scale_x_discrete(guide = guide_axis(angle = 0)) +
   ggtitle("A")
@@ -96,7 +96,7 @@ dat1 <- merge(adiv, res, by = "samp")
 dat1 <- column_to_rownames(dat1, "samp")
 
 model2 <- lm(residuals ~ MF, data = dat1)
-summary(model2) # P = 0.00
+summary(model2) # P = 0.52
 
 
 # violin plot 
@@ -108,7 +108,7 @@ ps.meta$'' <- alpha(sig, index = 'shannon')
 B <- ggviolin(ps.meta, x = "Male.Female", y = "Shannon$Shannon",
               add = "boxplot", fill = "Male.Female", palette = c("#367aa1", "#def4e5"), title = "B", ylab = "Shannon's Diversity Index", xlab = " ") +
   theme(legend.position = "none") +
-  theme(text = element_text(size = 15), axis.title = element_text(size = 15)) +
+  theme(text = element_text(size = 30), axis.title = element_text(size = 30)) +
   scale_y_continuous(limits = c(1, 7))
 B
 
@@ -121,7 +121,7 @@ ait <- sig %>%
 
 
 # test beta dispersion
-ait %>% dist_bdisp(variables = "Male.Female") %>% bdisp_get() # p=0.00015
+ait %>% dist_bdisp(variables = "Male.Female") %>% bdisp_get() # p=0.55
 
 # test with PERMANOVA
 mod1 <- ait %>%
@@ -131,7 +131,7 @@ mod1 <- ait %>%
     n_perms = 9999
   )
 
-mod1 # R2 = 0.01, F(1, 65) = 1.06, P = 0.34
+mod1 # R2 = 0.04, F(1, 24) = 0.95, P = 0.52
 # plot
 
 C <- psrel %>% 
@@ -139,15 +139,15 @@ C <- psrel %>%
   tax_transform(trans = "clr") %>%
   ord_calc(method = "PCA") %>% 
   ord_plot(color = "Male.Female", size = 6, axes = c(2,3)) +
-  scale_color_manual(values = c("#def4e5", "#367aa1")) +
+  scale_color_manual(values = c("#0b0405", "#367aa1")) +
   stat_ellipse(aes(group = Male.Female, color = Male.Female)) + 
   theme_classic() +
   labs(color = "Gender") +
   ggtitle("C") + 
-  labs(caption = "R2 = 0.01, F(1, 65) = 1.06, P = 0.34") +
-  theme(text = element_text(size = 15)) 
+  labs(caption = "R2 = 0.04, F(1, 24) = 0.95, P = 0.52") +
+  theme(text = element_text(size = 30)) 
 C
 
 (A|B)/C
 
-ggsave(filename = "plots/paper/figure7.pdf", dpi = 600, width = 12, height = 10)
+ggsave(filename = "plots/paper/figure7.pdf", dpi = 600, width = 20, height = 16)
