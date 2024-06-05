@@ -52,5 +52,3 @@ tax_table(ps) <- phyloseq(tax_table(taxtab))
 tax_table(ps)
 
 saveRDS(ps, "bovine-host-resistome/sig-decontam-ps.rds")
-
-
