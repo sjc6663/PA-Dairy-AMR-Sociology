@@ -2,7 +2,8 @@
 
 This data is from Pennsylvania Dairy Farms and is related to the antimicrobial resistance genes found on those farms and their relationship to sociological factors associated with the farm and farm operator/manager. The results are presented in a manuscript submitted to Journal of Rural Studies:
 
-Ransom, E., Bierly, S., Ganda, E., "Exploring the Relevance of Gender in Agriculture for Antimicrobial Resistance: A Case Study of PA Dairy Farms." Journal of Rural Studies. Submitted for Review January 2024.
+Ransom, E., Bierly, S., Ganda, E., "Identifying knowledge gaps surrounding antimicrobial resistance: An exploratory study of antimicrobial resistant genes on Pennsylvania dairy
+farms." Journal of Rural Studies. Submitted for Review January 2024.
 
 This repository includes scripts related to analyzing that data. Analysis was done using AMR++ for gene alignment and downstream analysis was completed with R in RStudio. Below is a breakdown of what each file is relevant for related to analysis. 
 
