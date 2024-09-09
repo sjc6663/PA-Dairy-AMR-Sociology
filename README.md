@@ -44,21 +44,18 @@ This script utilizes the decontam R package to remove contaminant genes based on
 ### sig-ps-creation.R
 This script is used to combine the Clinically Significant Genes csv file (CIA_genes.csv) with the phyloseq object to only select genes that are deemed clinically significant for downstream analysis. 
 
-### figure2.R
-This script is used for the generation of bar plots for cows and calves separating the samples by farm and Broadclass of AMR genes. 
+### figure_2.R
+This script is used for the generation of a bar plot, alpha diversity statistical test, violin plot, beta diversity statistical test, and PCA of data based on cow vs. calf identification of samples.
 
-### figure3.R
-This script is used for the generation of a bar plot, alpha diversity statistical test, violin plot, beta diversity statistical test, and PCA of data based on gender of primary farm operator. 
-
-### figure4.R 
-This script is used for the generation of a bar plot, alpha diversity statistical test, violin plot, beta diversity statistical test, and PCA of data based on cow vs. calf identification of samples. 
-
-### figure5.R
+### figure_3.R
 This script is used for the generation of a bar plot, alpha diversity statistical test, violin plot, and beta diversity statistical test of data based on type of labor at the farm (family vs. non-family). 
 
-### figure6.R
+### figure_4.R 
 This script is used for the generation of a bar plot, alpha diversity statistical test, violin plot, and beta diversity statistical test of data based on whether or not farms experience a language barrier between primary operator and employees. 
 
-### figure7.R
+### figure_5.R
+This script is used for the generation of a bar plot, alpha diversity statistical test, violin plot, beta diversity statistical test, and PCA of data based on gender of primary farm operator. 
+
+### figure_6.R
 This script is used for the generation of a bar plot, alpha diversity statistical test, violin plot, beta diversity statistical test, and PCA of data based on gender of primary farm operator for clincally significant genes. 
 
