@@ -1,6 +1,6 @@
 # Analysis of Whole Genome Sequencing (Shotgun Metagenomics) Data
 
-This data is from Pennsylvania Dairy Farms and is related to the antimicrobial resistance genes found on those farms and thier relationship to sociological factors associated with the farm and farm operator/manager. The results are presented in a manuscript submitted to Journal of Rural Studies:
+This data is from Pennsylvania Dairy Farms and is related to the antimicrobial resistance genes found on those farms and their relationship to sociological factors associated with the farm and farm operator/manager. The results are presented in a manuscript submitted to Journal of Rural Studies:
 
 Ransom, E., Bierly, S., Ganda, E., "Exploring the Relevance of Gender in Agriculture for Antimicrobial Resistance: A Case Study of PA Dairy Farms." Journal of Rural Studies. Submitted for Review January 2024.
 
@@ -10,7 +10,7 @@ This repository includes scripts related to analyzing that data. Analysis was do
 ## Data
 
 ### CIA_genes.csv
-This file lists all of the clinically signficant genes selected based on the WHO list of clinically significant antimicrobial classes. 
+This file lists all of the clinically significant genes selected based on the WHO list of clinically significant antimicrobial classes. 
 
 ### PADairy-AMR-Metadata.xlsx
 This is the metadata file with anonymous survey results for the study. 
@@ -30,7 +30,7 @@ This is the decontaminated phyloseq object only containing information for the c
 ## Scripts
 
 ### bash scripts folder
-These bash scripts are used on the raw data to run the samples through AMRPlusPlus in Penn State's Roar Collab Super Computer. Slight modification can be performed to fit the job to any linux based system. 
+These bash scripts are used on the raw data to run the samples through AMRPlusPlus in Penn State's Roar Collab Super Computer. Slight modification can be performed to fit the job to any Linux-based system. 
 
 ### merge-outputs.R
 This script is used to generate the batches of output data from AMRPlusPlus into one matrix gene file and one matrix count file to import into phyloseq.
@@ -48,14 +48,14 @@ This script is used to combine the Clinically Significant Genes csv file (CIA_ge
 This script is used for the generation of a bar plot, alpha diversity statistical test, violin plot, beta diversity statistical test, and PCA of data based on cow vs. calf identification of samples.
 
 ### figure_3.R
-This script is used for the generation of a bar plot, alpha diversity statistical test, violin plot, and beta diversity statistical test of data based on type of labor at the farm (family vs. non-family). 
+This script is used for the generation of a bar plot, alpha diversity statistical test, violin plot, and beta diversity statistical test of data based on the type of labor at the farm (family vs. non-family). 
 
 ### figure_4.R 
 This script is used for the generation of a bar plot, alpha diversity statistical test, violin plot, and beta diversity statistical test of data based on whether or not farms experience a language barrier between primary operator and employees. 
 
 ### figure_5.R
-This script is used for the generation of a bar plot, alpha diversity statistical test, violin plot, beta diversity statistical test, and PCA of data based on gender of primary farm operator. 
+This script is used for the generation of a bar plot, alpha diversity statistical test, violin plot, beta diversity statistical test, and PCA of data based on the gender of the primary farm operator. 
 
 ### figure_6.R
-This script is used for the generation of a bar plot, alpha diversity statistical test, violin plot, beta diversity statistical test, and PCA of data based on gender of primary farm operator for clincally significant genes. 
+This script is used for the generation of a bar plot, alpha diversity statistical test, violin plot, beta diversity statistical test, and PCA of data based on the gender of the primary farm operator for clinically significant genes. 
 
