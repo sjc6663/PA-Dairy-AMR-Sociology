@@ -25,6 +25,10 @@ set.seed(81299)
 # read in phyloseq object
 ps <- readRDS("bovine-host-resistome/decontam-ps.RDS")
 
+# subset samples to be only conventional farms
+ps <- subset_samples(ps,
+                     Conventional.Organic == "Conventional")
+
 # transform to relative abundance
 psrel <- microbiome::transform(ps, "compositional")
 
