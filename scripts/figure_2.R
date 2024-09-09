@@ -1,4 +1,4 @@
-# Paper Figure 4 - Age Group: Relative Abund, Alpha, Beta
+# Paper Figure 2 - Age Group: Relative Abund, Alpha, Beta
 # SAB 11/16/2023
 
 # setup ----
