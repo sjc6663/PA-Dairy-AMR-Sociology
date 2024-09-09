@@ -1,4 +1,4 @@
-# Paper Figure 6 - Language Barrier: Relative Abund, Alpha, Beta
+# Paper Figure 4 - Language Barrier: Relative Abund, Alpha, Beta
 # SAB 11/16/2023
 
 # setup ----
