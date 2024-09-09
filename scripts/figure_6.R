@@ -1,4 +1,4 @@
-# Figure 7 - clinically significant genes, gender (rel abund, alpha, beta)
+# Figure 6 - clinically significant genes, gender (rel abund, alpha, beta)
 # SAB 09/12/2023
 
 # null statistical hypothesis:
