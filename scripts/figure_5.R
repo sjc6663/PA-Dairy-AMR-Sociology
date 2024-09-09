@@ -1,4 +1,4 @@
-# Paper Figure 2 - Gender: Relative Abund, Alpha, Beta
+# Paper Figure 5 - Gender: Relative Abund, Alpha, Beta
 # SAB 11/16/2023
 
 # setup ----
