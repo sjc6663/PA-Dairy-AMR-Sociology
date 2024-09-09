@@ -1,4 +1,4 @@
-# Analysis of Whole Genome Sequencing (Shotgun Metagenomics) Data
+# Analysis of Shotgun Metagenomics Data
 
 This data is from Pennsylvania Dairy Farms and is related to the antimicrobial resistance genes found on those farms and their relationship to sociological factors associated with the farm and farm operator/manager. The results are presented in a manuscript submitted to Journal of Rural Studies:
 
